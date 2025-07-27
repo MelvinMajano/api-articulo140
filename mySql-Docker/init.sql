@@ -91,6 +91,7 @@ CREATE TABLE actividad (
     fecha_inicio DATETIME NOT NULL,
     fecha_fin DATETIME,
     horasVoae INT NOT NULL,
+    cupos_disponibles INT NOT NULL,
     supervisor_id CHAR(36) NOT NULL,
     estado_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
