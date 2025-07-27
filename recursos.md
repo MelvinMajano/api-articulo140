@@ -28,10 +28,14 @@
 - PUT    `/api/activities/:id`                     → Actualizar actividad  
 - DELETE `/api/activities/:id`                     → Eliminar (lógicamente) actividad  
 
+### Subrecursos
+
 - GET    `/api/activities/:id/asistance`           → Ver asistencia de la actividad  
 - GET    `/api/activities/:id/files`               → Ver archivos de la actividad (2da etapa)  
 - POST   `/api/activities/:id/files`               → Asignar archivo a actividad (2da etapa)  
 - DELETE `/api/activities/files/:id`               → Eliminar archivo de actividad (2da etapa)  
+
+### Inscripciones
 
 - POST   `/api/activities/register/:id`            → Registrarse en una actividad  
 - PUT    `/api/activities/register/end/:id`        → Cerrar inscripciones  
