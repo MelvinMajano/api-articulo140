@@ -20,7 +20,7 @@
 
 ##  Activities (Actividades)
 
-### Actividades principales
+### Actividades 
 
 - GET    `/api/activities`                         → Ver todas las actividades  
 - GET    `/api/activities/:id`                     → Ver actividad específica  
@@ -28,7 +28,7 @@
 - PUT    `/api/activities/:id`                     → Actualizar actividad  
 - DELETE `/api/activities/:id`                     → Eliminar (lógicamente) actividad  
 
-### Subrecursos
+### Logica para la siguiente version 
 
 - GET    `/api/activities/:id/asistance`           → Ver asistencia de la actividad  
 - GET    `/api/activities/:id/files`               → Ver archivos de la actividad (2da etapa)  
