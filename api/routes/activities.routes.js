@@ -13,4 +13,4 @@ activitiesRouter.put('/:id',ActitiesController.putActividadbyidController);
 
 activitiesRouter.delete('/:id',ActitiesController.deleteActividadByidController);
 
-export default activitiesRouter;
+export default activitiesRouter; 
