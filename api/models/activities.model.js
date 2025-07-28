@@ -1,5 +1,12 @@
 import {pool} from "../config/db.js"
 
+export const getActividadModel =async()=>{
+    const query =`select *from actividad`;
+
+    const [rows] = await pool.query(query);
+    return rows;
+}
+
 export const crearActividadModel =async(data)=>{
     const {id,titulo,descripcion,carreraid,fecha_inicio,fecha_fin,horasVoae,
 cuposDisponibles,supervisorId,estadoId,ambitoId}= data;
@@ -28,5 +35,29 @@ cuposDisponibles,supervisorId,estadoId]);
     }finally{
         conn.release();
     }
+
+}
+
+export const getActividadbyIdModel =async(id)=>{
+    const query =`select *from actividad
+    where id = ?`;
+
+    const [rows] = await pool.query(query,[id]);
+    return rows;
+}
+
+export const putActividadbyidModel =async(id,data)=>{
+    const {titulo,descripcion,fecha_inicio,fecha_fin,horasVoae,
+cuposDisponibles,supervisorId,ambitoId}= data;
+
+    const query = `update actividad 
+    set titulo=?,descripcion=?,fecha_inicio=?,fecha_fin=?,horasVoae=?,
+cupos_Disponibles=?,supervisor_id=? 
+where id=?`;
+    
+    await pool.query(query,[titulo,descripcion,fecha_inicio,fecha_fin,horasVoae,
+cuposDisponibles,supervisorId]);
+
+    
 
 }
