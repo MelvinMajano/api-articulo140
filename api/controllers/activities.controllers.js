@@ -4,20 +4,32 @@ import { v4 as uuidv4 } from "uuid";
 
 class ActitiesController {
     static getActividadController =async(req,res)=>{
-        try {
-            const response = await getActividadModel();
-            res.json(response)
+        
+         try {
+            const actividades = await getActividadModel();
+
+            if (actividades.length === 0) {
+                return res.status(404).json({message: 'No se encontraron actividades'});
+            }
+
+            res.json(actividades);
+
         } catch (error) {
-            res.status(404).json({message:'Hubo un error al obtener la data', error})
+            res.status(500).json({message: 'Error al obtener las actividades', error});
         }
     }
 
     static getActividadbyIdController = async(req,res)=>{
+
         const {id} = req.params;
         try {
-            const response =  await getActividadbyIdModel(id);
+            const actividad =  await getActividadbyIdModel(id);
 
-            res.json(response);
+            if (actividad.length === 0) {
+                return res.status(404).json({message: 'Actividad no encontrada'});
+            }
+
+            res.status(200).json(actividad);
         } catch (error) {
             res.status(400).json({message:'Hubo un problema al obtener la actividad '},error)
         }

@@ -1,11 +1,45 @@
 import {pool} from "../config/db.js"
 
 export const getActividadModel =async()=>{
-    const query =`select *from actividad`;
+    const conn = await pool.getConnection();
+    try {
+        const query = `select a.titulo, a.descripcion, a.fecha_inicio, a.fecha_fin, a.horasVoae, a.cupos_disponibles, u.nombre as Supervisor, e.nombre as Estado from actividad as a
+                       inner join users as u on a.supervisor_id = u.id
+                       inner join estado as e on a.estado_id = e.id`;
 
-    const [rows] = await pool.query(query);
-    return rows;
+        const [rows] = await conn.execute(query);
+
+        return rows;
+
+    }
+    catch (error) {
+        throw error;
+    } finally {
+        conn.release();
+    }
 }
+
+
+export const getActividadbyIdModel =async(id)=>{
+
+    const conn = await pool.getConnection();
+
+    try {
+    const query =`select a.titulo, a.descripcion, a.fecha_inicio, a.fecha_fin, a.horasVoae, a.cupos_disponibles, u.nombre as Supervisor, e.nombre as Estado from actividad as a
+                  inner join users as u on a.supervisor_id = u.id
+                  inner join estado as e on a.estado_id = e.id
+                  where a.id = ?`;
+
+    const [rows] = await conn.query(query,[id]);
+    return rows;
+    }
+    catch (error) {
+        throw error;
+    } finally {
+        conn.release();
+    }
+}
+
 
 export const crearActividadModel =async(data)=>{
     const {id,titulo,descripcion,carreraid,fecha_inicio,fecha_fin,horasVoae,
@@ -36,14 +70,6 @@ cuposDisponibles,supervisorId,estadoId]);
         conn.release();
     }
 
-}
-
-export const getActividadbyIdModel =async(id)=>{
-    const query =`select *from actividad
-    where id = ?`;
-
-    const [rows] = await pool.query(query,[id]);
-    return rows;
 }
 
 export const putActividadbyidModel =async(id,data)=>{
