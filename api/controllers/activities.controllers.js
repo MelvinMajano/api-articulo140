@@ -1,8 +1,10 @@
-import { crearActividadModel, getActividadbyIdModel, getActividadModel, putActividadbyidModel } from "../models/activities.model.js"
+import { crearActividadModel, getActividadbyIdModel, getActividadModel, putActividadbyidModel,
+         registerStudentModel
+} from "../models/activities.model.js"
 import { validateActividad } from "../schemas/activitiesSchema.js"
 import { v4 as uuidv4 } from "uuid";
 
-class ActitiesController {
+class ActivitiesController {
     static getActividadController =async(req,res)=>{
         
          try {
@@ -70,6 +72,18 @@ class ActitiesController {
     static deleteActividadByidController =(req,res)=>{
         res.json({message:'Actividad eliminada'})
     }
+
+    static registeStudentinActivity = async (req, res) => {
+    
+        const {id,activityid} = req.params
+
+       try{
+           const response = await registerStudentModel(id,activityid)
+           res.json({message:`El estudiante ha sido registrado en la actividad con exito`})
+       } catch (error) {
+           res.status(400).json({message:'Hubo un problema al registrar al estudiante', error})
+       }
+    }
 }
 
-export default ActitiesController;
+export default ActivitiesController;

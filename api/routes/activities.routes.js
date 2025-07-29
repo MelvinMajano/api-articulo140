@@ -1,16 +1,18 @@
 import { Router } from "express";
-import ActitiesController from "../controllers/activities.controllers.js";
+import ActivitiesController from "../controllers/activities.controllers.js";
 
 const activitiesRouter = Router();
 
-activitiesRouter.get('/',ActitiesController.getActividadController);
+activitiesRouter.get('/',ActivitiesController.getActividadController);
 
-activitiesRouter.get('/:id',ActitiesController.getActividadbyIdController);
+activitiesRouter.get('/:id',ActivitiesController.getActividadbyIdController);
 
-activitiesRouter.post('/',ActitiesController.crearActividadController);
+activitiesRouter.post('/',ActivitiesController.crearActividadController);
 
-activitiesRouter.put('/:id',ActitiesController.putActividadbyidController);
+activitiesRouter.post('/:activityid/register/:id', ActivitiesController.registeStudentinActivity)
 
-activitiesRouter.delete('/:id',ActitiesController.deleteActividadByidController);
+activitiesRouter.put('/:id',ActivitiesController.putActividadbyidController);
+
+activitiesRouter.delete('/:id',ActivitiesController.deleteActividadByidController);
 
 export default activitiesRouter; 

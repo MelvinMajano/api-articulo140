@@ -13,7 +13,7 @@
 | GET    | ` api/activities/:id/asistance/`         | Permitira ver la asistencia de una actividad en especifico.|
 | GET    | ` api/activities/:id/files`         | Permitira ver los documentos de una actividad en especifico. //Segunda etapa| 
 | POST    | ` api/activities`     | Permitira a los usuarios registrar una nueva actividad. |
-| POST   | ` api/activities/register/:id`         | Permite a los usuarios registrarse en una actividad en especifico| 
+| POST   | ` api/activities/:activityid/register/:id`         | Permite a los usuarios registrarse en una actividad en especifico| 
 | POST    | ` api/activities/:id/files/`         | Permitira asignar un documento a una actividad en especifico. /Segunda etapa|  
 | POST    | ` api/users/:id/activities/:id/asistence`         | Permitira registrar la asistencia de los usuarios registrados en una actividad|  
 | PUT   | ` api/activities/:id`     | Permitira a los usuarios con roles de administrador actualizar datos de cierta actividad. |
