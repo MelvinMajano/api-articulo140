@@ -96,18 +96,59 @@ export const registerStudentModel = async (studentID, activityID) => {
 
 }
 
-export const putActividadbyidModel =async(id,data)=>{
-    const {titulo,descripcion,fecha_inicio,fecha_fin,horasVoae,
+export const putActividadbyidModel =async(data)=>{
+   const {actividadId,titulo,descripcion,fecha_inicio,fecha_fin,horasVoae,
 cuposDisponibles,supervisorId,ambitoId}= data;
-
-    const query = `update actividad 
-    set titulo=?,descripcion=?,fecha_inicio=?,fecha_fin=?,horasVoae=?,
-cupos_Disponibles=?,supervisor_id=? 
-where id=?`;
     
-    await pool.query(query,[titulo,descripcion,fecha_inicio,fecha_fin,horasVoae,
-cuposDisponibles,supervisorId]);
+    const conn = await pool.getConnection();
+    try {
+    await conn.beginTransaction();
+        const query = `update actividad
+        set titulo=?,descripcion=?,fecha_inicio=?,fecha_fin=?,horasVoae=?,
+cupos_Disponibles=?,supervisor_id=?
+    where id=?`;
 
+    await conn.execute(query,[titulo,descripcion,fecha_inicio,fecha_fin,horasVoae,
+cuposDisponibles,supervisorId,actividadId]);
     
+    const queryDeleteAmbito= `Delete from actividad_ambito where actividad_id=?`
+    await conn.execute(queryDeleteAmbito,[actividadId])
+    
+    ambitoId.forEach( async (ambito) => {
+        const queryActividad_ambito = `insert into actividad_ambito(actividad_id,ambito_id)
+        values(?,?)`;
+        await conn.execute(queryActividad_ambito,[actividadId,ambito]);
+    });
 
+    conn.commit();
+    return data;
+    } catch (error) {
+        conn.rollback();
+        throw error;
+    }finally{
+        conn.release();
+    }
+}
+
+export const deleteActividadByidModel =async(id)=>{
+    const cnn = await pool.getConnection();
+    await cnn.beginTransaction();
+
+    try {
+        const query = `Delete from actividad_ambito 
+        where actividad_id = ?`
+        await cnn.execute(query,[id]);
+
+        const queryActivida = `Delete from actividad 
+        where id = ?`
+        await cnn.execute(queryActivida,[id]);
+
+        cnn.commit();
+    } catch (error) {
+        cnn.rollback();
+        throw error
+    }finally{
+        cnn.release();
+    }
+    
 }

@@ -1,7 +1,7 @@
-import { crearActividadModel, getActividadbyIdModel, getActividadModel, putActividadbyidModel,
+import { crearActividadModel, deleteActividadByidModel, getActividadbyIdModel, getActividadModel, putActividadbyidModel,
          registerStudentModel
 } from "../models/activities.model.js"
-import { validateActividad } from "../schemas/activitiesSchema.js"
+import { validateActividad, validateActividadput } from "../schemas/activitiesSchema.js"
 import { v4 as uuidv4 } from "uuid";
 
 class ActivitiesController {
@@ -61,16 +61,29 @@ class ActivitiesController {
     static putActividadbyidController = async(req,res)=>{
         const {id} = req.params;
         const data = req.body;
+        data.actividadId=id;
+        const {success,error,data:safedata}=await validateActividadput(data);
+
+        if(!success){
+            return res.status(400).json({message:`Hubo un error al validar la data`,error})
+        }
+        
         try {
-            const response = await putActividadbyidModel(id,data);
-            res.json({message:`La actividad ha sido actualizada con exito`})
+            const response = await putActividadbyidModel(safedata);
+            res.json({message:`La actividad ha sido actualizada con exito`,response})
         } catch (error) {
-            res.status(404).json({message:`Hubo un problema al actualizar la actividad`})
+            res.status(500).json({message:`Hubo un problema al actualizar la actividad`})
         }
     }   
 
-    static deleteActividadByidController =(req,res)=>{
-        res.json({message:'Actividad eliminada'})
+    static deleteActividadByidController =async(req,res)=>{
+        const {id}= req.params;
+        try {
+            await deleteActividadByidModel(id);
+            res.json({message:`Actividad eliminada correctamente`})
+        } catch (error) {
+            res.status(500).json({message:`Hubo un problema al eliminar la actividad`,error})
+        }
     }
 
     static registeStudentinActivity = async (req, res) => {
