@@ -1,10 +1,10 @@
-import { crearActividadModel, deleteActividadByidModel, getActividadbyIdModel, getActividadModel, putActividadbyidModel,
-         registerStudentModel
-} from "../models/activities.model.js"
+import { crearActividadModel, deleteActividadByidModel, getActividadbyIdModel, getActividadModel, putActividadbyidModel
+} from "../models/activitiesModel/activities.model.js"
+import { registerStudentModel } from "../models/activitiesModel/activitiesInscripciones.model.js";
 import { validateActividad, validateActividadput } from "../schemas/activitiesSchema.js"
 import { v4 as uuidv4 } from "uuid";
 
-class ActivitiesController {
+export class ActivitiesController {
     static getActividadController =async(req,res)=>{
         
          try {
@@ -65,7 +65,7 @@ class ActivitiesController {
         const {success,error,data:safedata}=await validateActividadput(data);
 
         if(!success){
-            return res.status(400).json({message:`Hubo un error al validar la data`,error})
+            return res.status(400).json({message:`Hubo un error al validar la data`,error}) 
         }
         
         try {
@@ -85,7 +85,9 @@ class ActivitiesController {
             res.status(500).json({message:`Hubo un problema al eliminar la actividad`,error})
         }
     }
+}
 
+export class ActivitiesInscripcionesController {
     static registeStudentinActivity = async (req, res) => {
     
         const {id,activityid} = req.params
@@ -98,5 +100,3 @@ class ActivitiesController {
        }
     }
 }
-
-export default ActivitiesController;
