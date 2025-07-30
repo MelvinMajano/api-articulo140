@@ -41,5 +41,5 @@
 - POST   `/api/activities/register/:id`            → Registrarse en una actividad  
 - PUT    `/api/activities/register/end/:id`        → Cerrar inscripciones  
 - PUT    `/api/activities/finish/:id`              → Marcar actividad como finalizada  
-- DELETE `/api/activities/register/:id`            → Desinscribirse de actividad  
+- DELETE `/api/activities/:activityid/unsubscribe/:id`            → Desinscribirse de actividad  
 ---

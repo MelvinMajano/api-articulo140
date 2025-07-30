@@ -22,7 +22,7 @@
 | PUT | ` api/activities/finish/:id`         | Permitira a los supervisores dar por terminada la asistencia en una actividad|
 | DELETE    | ` api/activities/:id`     | Permitira a los usuarios con roles de administrador eliminar logicamente una actividad . |
 | DELETE    | ` api/activities/files/:id`         | Permitira eliminar un documento a una actividad en especifico. /Segunda etapa|  
-| DELETE    | ` api/activities/register/:id`         | Permitira desenscribirse de una actividad|  
+| DELETE    | ` api/activities/:activityid/unsubscribe/:id`         | Permitira desenscribirse de una actividad|  
 | DELETE    | ` api/auth/register/:id`         | Permitira eliminar a un usuario|  
 
 

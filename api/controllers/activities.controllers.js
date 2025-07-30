@@ -1,6 +1,6 @@
 import { crearActividadModel, deleteActividadByidModel, getActividadbyIdModel, getActividadModel, putActividadbyidModel
 } from "../models/activitiesModel/activities.model.js"
-import { registerStudentModel } from "../models/activitiesModel/activitiesInscripciones.model.js";
+import { registerStudentModel, unsubscribeStudentModel, closeInscriptionsModel, closeActivityModel } from "../models/activitiesModel/activitiesInscripciones.model.js";
 import { validateActividad, validateActividadput } from "../schemas/activitiesSchema.js"
 import { v4 as uuidv4 } from "uuid";
 
@@ -96,8 +96,65 @@ export class ActivitiesInscripcionesController {
            const response = await registerStudentModel(id,activityid)
            res.json({message:`El estudiante ha sido registrado en la actividad con exito`})
        } catch (error) {
-           res.status(400).json({message:'Hubo un problema al registrar al estudiante', error})
+           res.status(500).json({message:'Hubo un problema al registrar al estudiante', error})
        }
+    }
+
+    static unsubscribeStudentinActivity = async (req,res) => {
+
+        const {activityid, id} = req.params;
+
+        try{
+
+         const result = await unsubscribeStudentModel(id, activityid);
+         
+        if (result.affectedRows === 0){
+            return res.status(404).json({message: 'No se encontró el registro de inscripción para el estudiante en esta actividad'});
+        }
+
+        res.json({message:`El estudiante ha sido desuscrito de la actividad con exito`});
+        } catch (error) {
+            res.status(500).json({message:'Hubo un problema al desuscribir al estudiante', error})
+        }
+    }
+
+    static closeInscriptions = async (req,res) => {
+        const {id} = req.params;
+
+        try{
+
+        const response = await closeInscriptionsModel(id);
+
+        if (response.affectedRows === 0) {
+            return res.status(404).json({ message: 'No se encontró la actividad para cerrar inscripciones' });
+        }
+
+        res.json({ message: 'Las inscripciones han sido cerradas con éxito' });
+
+        } catch (error) {
+            res.status(500).json({message:'Hubo un problema al cerrar las inscripciones', error})
+        }
+    }
+
+    static closeActivity = async (req, res) => {
+
+        const {id} = req.params;
+
+        try {
+
+            const response = await closeActivityModel(id);
+
+            if (response.affectedRows === 0) {
+                return res.status(404).json({ message: 'No se encontró la actividad para cerrar' });
+            }
+
+            res.json({ message: 'La actividad ha sido cerrada con éxito' });
+
+        }
+        catch (error) {
+            res.status(500).json({message:'Hubo un problema al cerrar la actividad', error})
+        }
+
     }
 }
 

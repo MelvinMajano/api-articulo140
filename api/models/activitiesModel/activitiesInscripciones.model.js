@@ -20,5 +20,73 @@ export const registerStudentModel = async (studentID, activityID) => {
     finally{
         cnn.release();
     }
+}
+
+export const unsubscribeStudentModel = async (studentID, activityID) => {
+
+    const cnn = await pool.getConnection();
+    await cnn.beginTransaction();
+
+    try {
+
+        const query = `delete from registro where actividad_id = ? and estudiante_id = ?`
+
+        const [rows] = await cnn.execute(query, [activityID,studentID])
+
+        cnn.commit()
+
+        return rows;
+
+    } catch (error) {
+        cnn.rollback();
+        throw error;
+    } finally {
+        cnn.release();
+    }
+}
+
+export const closeInscriptionsModel = async (activityID) => {
+
+    const cnn = await pool.getConnection();
+    await cnn.beginTransaction();
+
+    try{
+        
+        const query = `update registro set estado_registro_id = 2 where actividad_id = ?`
+
+        const [rows] = await cnn.execute(query, [activityID]);
+
+        cnn.commit();
+        return rows;
+
+    } catch (error) {
+        cnn.rollback();
+        throw error;
+    } finally {
+        cnn.release();
+    }
+}
+
+export const closeActivityModel = async (activityID) => {
+
+    const cnn = await pool.getConnection();
+    await cnn.beginTransaction();
+
+    try{
+
+        const query = ` update actividad set estado_id = 3 where id = ? `
+
+        const [rows] = await cnn.execute(query, [activityID]);
+        cnn.commit();   
+
+        return rows;
+
+    } catch (error) {
+        cnn.rollback();
+        throw error;
+    } finally {
+        cnn.release();
+    }
 
 }
+

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {ActivitiesAttendanceController, ActivitiesController,ActivitiesInscripcionesController} from "../controllers/activities.controllers.js";
 
+
 const activitiesRouter = Router();
 
 activitiesRouter.get('/',ActivitiesController.getActividadController);
@@ -18,5 +19,8 @@ activitiesRouter.post(':id/attendance',ActivitiesAttendanceController.confirmarA
 
 //Logica de inscripciones
 activitiesRouter.post('/:activityid/register/:id', ActivitiesInscripcionesController.registeStudentinActivity)
+activitiesRouter.delete('/:activityid/unsubscribe/:id', ActivitiesInscripcionesController.unsubscribeStudentinActivity);
+activitiesRouter.put('/register/end/:id', ActivitiesInscripcionesController.closeInscriptions)
+activitiesRouter.put('/finish/:id', ActivitiesInscripcionesController.closeActivity);
 
 export default activitiesRouter;  
