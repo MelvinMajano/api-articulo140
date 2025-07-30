@@ -100,3 +100,11 @@ export class ActivitiesInscripcionesController {
        }
     }
 }
+
+
+export class ActivitiesAttendanceController {
+    static confirmarAsistencia =()=>{
+        const data = req.body
+        
+    }
+}
