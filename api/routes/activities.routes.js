@@ -1,5 +1,5 @@
 import { Router } from "express";
-import {ActivitiesAttendanceController, ActivitiesController,ActivitiesInscripcionesController} from "../controllers/activities.controllers.js";
+import {ActivitiesAttendanceController, ActivitiesController,ActivitiesFilesController,ActivitiesInscripcionesController} from "../controllers/activities.controllers.js";
 
 
 const activitiesRouter = Router();
@@ -22,5 +22,8 @@ activitiesRouter.post('/:activityid/register/:id', ActivitiesInscripcionesContro
 activitiesRouter.delete('/:activityid/unsubscribe/:id', ActivitiesInscripcionesController.unsubscribeStudentinActivity);
 activitiesRouter.put('/register/end/:id', ActivitiesInscripcionesController.closeInscriptions)
 activitiesRouter.put('/finish/:id', ActivitiesInscripcionesController.closeActivity);
+
+//logica de archivos
+activitiesRouter.post('/:id/files',ActivitiesFilesController.postActivitiesFilesController);
 
 export default activitiesRouter;  
