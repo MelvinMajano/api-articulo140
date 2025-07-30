@@ -1,5 +1,5 @@
 import { Router } from "express";
-import {ActivitiesAttendanceController, ActivitiesController,ActivitiesInscripcionesController} from "../controllers/activities.controllers.js";
+import {ActivitiesAttendanceController, ActivitiesController,ActivitiesFilesController,ActivitiesInscripcionesController} from "../controllers/activities.controllers.js";
 
 const activitiesRouter = Router();
 
@@ -18,5 +18,8 @@ activitiesRouter.post(':id/attendance',ActivitiesAttendanceController.confirmarA
 
 //Logica de inscripciones
 activitiesRouter.post('/:activityid/register/:id', ActivitiesInscripcionesController.registeStudentinActivity)
+
+//logica de archivos
+activitiesRouter.post('/:id/files',ActivitiesFilesController.postActivitiesFilesController);
 
 export default activitiesRouter;  
