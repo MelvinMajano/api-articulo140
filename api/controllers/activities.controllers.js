@@ -1,7 +1,7 @@
 import { crearActividadModel, deleteActividadByidModel, getActividadbyIdModel, getActividadModel, putActividadbyidModel
 } from "../models/activitiesModel/activities.model.js"
 import { registerAttendanceModel } from "../models/activitiesModel/activitiesAttendance.model.js";
-import { postActivitiesFilesModel } from "../models/activitiesModel/activitiesFile.model.js";
+import { getActivitiesFilesModel, postActivitiesFilesModel } from "../models/activitiesModel/activitiesFile.model.js";
 import { validateFile } from "../schemas/ActivitiesSchema/activitiesFileShema.js";
 import { validateAttendance } from "../schemas/ActivitiesSchema/activitiesAttendanceSchema.js";
 import { validateActividad, validateActividadput } from "../schemas/ActivitiesSchema/activitiesSchema.js"
@@ -187,8 +187,14 @@ export class ActivitiesAttendanceController {
 }
 
 export class ActivitiesFilesController {
-    static getActivitiesFilesController =()=>{
-        
+    static getActivitiesFilesController =async(req,res)=>{
+        const {id} = req.params;
+        try {
+            const response = await getActivitiesFilesModel(id)
+            res.json(response);
+        } catch (error) {
+            res.status(500).json({message:`hubo un error al obtener el archivo`,error})
+        }
     }
 
     static postActivitiesFilesController =async(req,res)=>{

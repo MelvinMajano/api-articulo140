@@ -3,15 +3,11 @@ import {ActivitiesAttendanceController, ActivitiesController,ActivitiesFilesCont
 
 
 const activitiesRouter = Router();
-
+//Actividades
 activitiesRouter.get('/',ActivitiesController.getActividadController);
-
 activitiesRouter.get('/:id',ActivitiesController.getActividadbyIdController);
-
 activitiesRouter.post('/',ActivitiesController.crearActividadController);
-
 activitiesRouter.put('/:id',ActivitiesController.putActividadbyidController);
-
 activitiesRouter.delete('/:id',ActivitiesController.deleteActividadByidController);
 
 //logica de asistencia
@@ -25,5 +21,6 @@ activitiesRouter.put('/finish/:id', ActivitiesInscripcionesController.closeActiv
 
 //logica de archivos
 activitiesRouter.post('/:id/files',ActivitiesFilesController.postActivitiesFilesController);
+activitiesRouter.get('/:id/files',ActivitiesFilesController.getActivitiesFilesController);
 
 export default activitiesRouter;  

@@ -6,3 +6,9 @@ export const postActivitiesFilesModel = async(file)=>{
 
     await pool.query(query,[id,actividad_id,nombre_archivo,url]);
 }
+
+export const getActivitiesFilesModel = async(id)=>{
+    const query = `select *from archivos where actividad_id = ?`;
+    const [rows] = await pool.query(query,[id])
+    return rows[0];
+}
