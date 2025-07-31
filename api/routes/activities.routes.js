@@ -15,7 +15,7 @@ activitiesRouter.put('/:id',ActivitiesController.putActividadbyidController);
 activitiesRouter.delete('/:id',ActivitiesController.deleteActividadByidController);
 
 //logica de asistencia
-activitiesRouter.post(':id/attendance',ActivitiesAttendanceController.confirmarAsistencia);
+activitiesRouter.post('/:registerid/attendance',ActivitiesAttendanceController.createAttendance);
 
 //Logica de inscripciones
 activitiesRouter.post('/:activityid/register/:id', ActivitiesInscripcionesController.registeStudentinActivity)

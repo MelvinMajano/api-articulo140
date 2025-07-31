@@ -1,11 +1,11 @@
 import { crearActividadModel, deleteActividadByidModel, getActividadbyIdModel, getActividadModel, putActividadbyidModel
 } from "../models/activitiesModel/activities.model.js"
+import { registerAttendanceModel } from "../models/activitiesModel/activitiesAttendance.model.js";
 import { postActivitiesFilesModel } from "../models/activitiesModel/activitiesFile.model.js";
-import { registerStudentModel } from "../models/activitiesModel/activitiesInscripciones.model.js";
 import { validateFile } from "../schemas/ActivitiesSchema/activitiesFileShema.js";
+import { validateAttendance } from "../schemas/ActivitiesSchema/activitiesAttendanceSchema.js";
 import { validateActividad, validateActividadput } from "../schemas/ActivitiesSchema/activitiesSchema.js"
 import { registerStudentModel, unsubscribeStudentModel, closeInscriptionsModel, closeActivityModel } from "../models/activitiesModel/activitiesInscripciones.model.js";
-import { validateActividad, validateActividadput } from "../schemas/activitiesSchema.js"
 import { v4 as uuidv4 } from "uuid";
 
 export class ActivitiesController {
@@ -164,9 +164,25 @@ export class ActivitiesInscripcionesController {
 
 
 export class ActivitiesAttendanceController {
-    static confirmarAsistencia =()=>{
+    static createAttendance = async (req, res) => {
         const data = req.body
-        
+        const {registerid} = req.params
+
+        const {success,error,data:safedata} = await validateAttendance(data);
+        if(!success){
+            return res.status(400).json({message:'Hubo un error al validar la data',error});
+        }
+
+        safedata.registro_id = registerid;
+
+        try {
+            const response = await registerAttendanceModel(safedata,);
+
+            res.json({message:'Asistencia registrada con éxito'});
+
+        } catch (error) {
+            res.status(500).json({message:'Hubo un problema al crear la asistencia', error});
+        }
     }
 }
 
