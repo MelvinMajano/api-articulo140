@@ -2,7 +2,7 @@ CREATE DATABASE IF NOT EXISTS articulo140;
 USE articulo140;
 
 CREATE TABLE degrees (
-    id INT AUTO_INCREMENT,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     code VARCHAR(10) NOT NULL UNIQUE,
     name VARCHAR(100) NOT NULL UNIQUE,
     faculty VARCHAR(100) NOT NULL,
@@ -10,11 +10,8 @@ CREATE TABLE degrees (
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-ALTER TABLE degrees
-ADD CONSTRAINT pk_degrees PRIMARY KEY (id);
-
 INSERT INTO degrees (code, name, faculty) VALUES
-('IS001', 'Ingeniería en Sistemas', 'Facultad de Ingeniería');
+('IS001', 'Ingenieria en Sistemas', 'Facultad de Ingenieria');
 
 
 CREATE TABLE users (
