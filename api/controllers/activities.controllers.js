@@ -1,5 +1,4 @@
-import { crearActividadModel, deleteActividadByidModel, getActividadbyIdModel, getActividadModel, putActividadbyidModel
-} from "../models/activitiesModel/activities.model.js"
+import { crearActividadModel, deleteActividadByidModel, getActividadbyIdModel, getActividadModel, putActividadbyidModel} from "../models/activitiesModel/activities.model.js"
 import { registerAttendanceModel } from "../models/activitiesModel/activitiesAttendance.model.js";
 import { getActivitiesFilesModel, postActivitiesFilesModel } from "../models/activitiesModel/activitiesFile.model.js";
 import { validateFile } from "../schemas/ActivitiesSchema/activitiesFileShema.js";
