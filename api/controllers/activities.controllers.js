@@ -1,11 +1,13 @@
-import { crearActividadModel, deleteActividadByidModel, getActividadbyIdModel, getActividadModel, putActividadbyidModel} from "../models/activitiesModel/activities.model.js"
-import { registerAttendanceModel } from "../models/activitiesModel/activitiesAttendance.model.js";
+import { crearActividadModel, deleteActividadByidModel, getActividadbyIdModel, getActividadModel, putActividadbyidModel
+} from "../models/activitiesModel/activities.model.js"
+import { registerAttendanceModel, getAttendanceModel, updateAttendanceModel} from "../models/activitiesModel/activitiesAttendance.model.js";
 import { getActivitiesFilesModel, postActivitiesFilesModel } from "../models/activitiesModel/activitiesFile.model.js";
 import { validateFile } from "../schemas/ActivitiesSchema/activitiesFileShema.js";
 import { validateAttendance } from "../schemas/ActivitiesSchema/activitiesAttendanceSchema.js";
 import { validateActividad, validateActividadput } from "../schemas/ActivitiesSchema/activitiesSchema.js"
 import { registerStudentModel, unsubscribeStudentModel, closeInscriptionsModel, closeActivityModel } from "../models/activitiesModel/activitiesInscripciones.model.js";
 import { v4 as uuidv4 } from "uuid";
+import { ca } from "zod/locales";
 
 export class ActivitiesController {
     static getActividadController =async(req,res)=>{
@@ -94,9 +96,10 @@ export class ActivitiesInscripcionesController {
     static registeStudentinActivity = async (req, res) => {
     
         const {id,activityid} = req.params
+        const register_id = uuidv4();
 
        try{
-           const response = await registerStudentModel(id,activityid)
+           const response = await registerStudentModel(register_id,id,activityid,id)
            res.json({message:`El estudiante ha sido registrado en la actividad con exito`})
        } catch (error) {
            res.status(500).json({message:'Hubo un problema al registrar al estudiante', error})
@@ -172,6 +175,7 @@ export class ActivitiesAttendanceController {
             return res.status(400).json({message:'Hubo un error al validar la data',error});
         }
 
+        safedata.id = uuidv4();
         safedata.registro_id = registerid;
 
         try {
@@ -182,6 +186,51 @@ export class ActivitiesAttendanceController {
         } catch (error) {
             res.status(500).json({message:'Hubo un problema al crear la asistencia', error});
         }
+    }
+
+    static viewAttendancebyId = async (req,res) => {
+
+        const {activityid} = req.params
+
+        try {
+
+            const response = await getAttendanceModel(activityid);
+
+            if (response.length === 0) {
+                return res.status(404).json({message: 'No se encontraron registros de asistencia para esta actividad'});
+            }
+
+            res.json(response);
+
+        } catch (error) {
+            res.status(500).json({message:'Hubo un problema al obtener la asistencia', error});
+        }
+    }
+
+    static updateUserAttendance = async (req,res) => {
+
+        const {activityid, userid} = req.params
+        const data = req.body;
+
+        const {success,error} = await validateAttendance(data);
+        if(!success){
+            return res.status(400).json({message:'Los datos de asistencia son inválidos',error});
+        }
+
+        try {
+
+            const response = await updateAttendanceModel(activityid, userid, data);
+
+            if (response.affectedRows === 0) {
+                return res.status(404).json({message: 'No se encontró el registro de asistencia para actualizar'});
+            }
+
+            res.json({message: 'Asistencia actualizada con éxito'});
+
+        } catch (error) {
+            res.status(500).json({message:'Hubo un problema al actualizar la asistencia del usuario', error});
+        }
+
     }
 }
 
