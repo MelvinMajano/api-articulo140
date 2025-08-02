@@ -53,7 +53,6 @@ CREATE TABLE activities (
     availableSpots INT NOT NULL,
     supervisorId CHAR(36) NOT NULL,
     status ENUM('pending', 'inProgress', 'finished', 'disabled') NOT NULL DEFAULT 'pending',
-    scopes SET('cultural', 'cientificoAcademico', 'deportivo', 'social') NOT NULL,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -66,6 +65,19 @@ ADD CONSTRAINT fk_activities_supervisor FOREIGN KEY (supervisorId) REFERENCES us
 
 ALTER TABLE activities
 ADD CONSTRAINT fk_activities_degree FOREIGN KEY (degreeId) REFERENCES degrees(id);
+
+CREATE TABLE activityScopes (
+    activityId CHAR(36) NOT NULL,
+    scope ENUM('cultural', 'cientificoAcademico', 'deportivo', 'social') NOT NULL,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+ALTER TABLE activityScopes
+ADD CONSTRAINT pk_activityScopes PRIMARY KEY (activityId, scope);
+
+ALTER TABLE activityScopes
+ADD CONSTRAINT fk_activityScopes_activity FOREIGN KEY (activityId) REFERENCES activities(id) ON DELETE CASCADE;
 
 CREATE TABLE registrations (
     studentId CHAR(36) NOT NULL,
