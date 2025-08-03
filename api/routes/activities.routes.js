@@ -25,4 +25,4 @@ activitiesRouter.put('/finish/:id', ActivitiesInscripcionesController.closeActiv
 activitiesRouter.post('/:id/files',ActivitiesFilesController.postActivitiesFilesController);
 activitiesRouter.get('/:id/files',ActivitiesFilesController.getActivitiesFilesController);
 
-export default activitiesRouter;  
+export default activitiesRouter;   

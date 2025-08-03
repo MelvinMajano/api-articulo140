@@ -2,6 +2,7 @@ import express from "express"
 import cors from "cors"
 import dotenv from "dotenv"
 import activitiesRouter from "./api/routes/activities.routes.js";
+import "./api/utils/activities/statusUpdater.js"
 
 const app=express()
 

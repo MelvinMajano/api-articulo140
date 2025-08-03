@@ -1,14 +1,14 @@
 import zod from "zod"
 
 const activitiesSchema = zod.object({
-    "titulo":zod.string(),
-    "descripcion":zod.string().min(5).max(500),
-    "fecha_inicio":zod.string(),
-    "fecha_fin":zod.string(),
-    "horasVoae":zod.number(),
-    "cuposDisponibles":zod.number(),
+    "title":zod.string(),
+    "description":zod.string().min(5).max(500),
+    "startDate":zod.coerce.date(),
+    "endDate":zod.coerce.date(),
+    "voaeHours":zod.number(),
+    "availableSpots":zod.number(),
     "supervisorId":zod.uuidv4(),
-    "ambitoId":zod.array(zod.enum(["1","2","3","4"])).min(1),
+    "scopes":zod.array(zod.enum(["1","2","3","4"])).min(1),
 }).strict();
 
 export const validateActividad = async(data)=>{
@@ -17,14 +17,15 @@ export const validateActividad = async(data)=>{
 
 const activitiesSchemaput = zod.object({
     "actividadId":zod.uuidv4(),
-    "titulo":zod.string(),
-    "descripcion":zod.string().min(5).max(500),
-    "fecha_inicio":zod.string(),
-    "fecha_fin":zod.string(),
-    "horasVoae":zod.number(),
-    "cuposDisponibles":zod.number(),
+    "title":zod.string(),
+    "description":zod.string().min(5).max(500),
+    "startDate":zod.coerce.date(),
+    "endDate":zod.coerce.date(),
+    "voaeHours":zod.number(),
+    "availableSpots":zod.number(),
     "supervisorId":zod.uuidv4(),
-    "ambitoId":zod.array(zod.enum(["1","2","3","4"])).min(1),
+    "scopes":zod.array(zod.enum(["1","2","3","4"])).min(1),
+    "isDisable": zod.number().int(),
 }).strict();
 
 export const validateActividadput = async(data)=>{

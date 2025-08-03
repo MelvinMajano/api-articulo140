@@ -7,7 +7,6 @@ import { validateAttendance } from "../schemas/ActivitiesSchema/activitiesAttend
 import { validateActividad, validateActividadput } from "../schemas/ActivitiesSchema/activitiesSchema.js"
 import { registerStudentModel, unsubscribeStudentModel, closeInscriptionsModel, closeActivityModel } from "../models/activitiesModel/activitiesInscripciones.model.js";
 import { v4 as uuidv4 } from "uuid";
-import { ca } from "zod/locales";
 
 export class ActivitiesController {
     static getActividadController =async(req,res)=>{
@@ -52,8 +51,7 @@ export class ActivitiesController {
         }
 
         data.id = uuidv4()
-        data.carreraid = 1
-        data.estadoId=1
+        data.degreeId = 1
 
         try {
             await crearActividadModel(data);
@@ -84,8 +82,8 @@ export class ActivitiesController {
     static deleteActividadByidController =async(req,res)=>{
         const {id}= req.params;
         try {
-            await deleteActividadByidModel(id);
-            res.json({message:`Actividad eliminada correctamente`})
+            const response = await deleteActividadByidModel(id);
+            res.json({message:`Actividad eliminada correctamente`, response})
         } catch (error) {
             res.status(500).json({message:`Hubo un problema al eliminar la actividad`,error})
         }
