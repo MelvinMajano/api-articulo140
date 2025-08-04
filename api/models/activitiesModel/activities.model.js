@@ -1,11 +1,13 @@
 import {pool} from "../../config/db.js"
 import { deshabilitarActividad, habilitarActividad } from "../../utils/activities/estatusManual.js";
 
+
+
 export const getActividadModel =async()=>{
-    const query = `select a.id, a.title,a.startDate, a.endDate, a.voaeHours, a.availableSpots,a.status,a.isDeleted, u.name as Supervisor, group_concat(ase.scope) as Scope from activities as a
+    const query = `select a.id, a.title,a.description,a.startDate, a.endDate, a.voaeHours, a.availableSpots,a.status,a.isDeleted, u.name as Supervisor, group_concat(ase.scope) as Scope from activities as a
     inner join users as u on a.supervisorId = u.id
     inner join activityScopes as ase on a.id = ase.activityId
-    group by a.id, a.title, a.startDate, a.endDate, a.voaeHours, a.availableSpots, a.status, u.name, a.isDeleted`;
+    group by a.id, a.title,a.description, a.startDate, a.endDate, a.voaeHours, a.availableSpots, a.status, u.name, a.isDeleted`;
 
     const [rows] = await pool.query(query);
 
@@ -14,17 +16,24 @@ export const getActividadModel =async()=>{
 
 export const getActividadbyIdModel =async(id)=>{
 
-    const query =`select a.id, a.title,a.startDate, a.endDate, a.voaeHours, a.availableSpots,a.status,a.isDeleted, u.name as Supervisor, group_concat(ase.scope) as Scope from activities as a
+    const query =`select a.id, a.title,a.description,a.startDate, a.endDate, a.voaeHours, a.availableSpots,a.status,a.isDeleted, u.name as Supervisor, group_concat(ase.scope) as Scope from activities as a
     inner join users as u on a.supervisorId = u.id
     inner join activityScopes as ase on a.id = ase.activityId 
     where a.id = ?
-    group by a.id, a.title, a.startDate, a.endDate, a.voaeHours, a.availableSpots, a.status, u.name, a.isDeleted`;
+    group by a.id, a.title, a.description, a.startDate, a.endDate, a.voaeHours, a.availableSpots, a.status, u.name, a.isDeleted`;
 
     const [rows] = await pool.query(query,[id]);
     return rows;
 }
 
-export const crearActividadModel =async(data)=>{
+export class ValidateCreateActivitiesModel {
+    static validateActivitiesModel = async()=>{
+        const query = ``;
+        const [rows] = pool.query(query,[id]);
+        return rows
+    }
+
+    static crearActividadModel =async(data)=>{
     const {id,title,description,degreeId,startDate,endDate,voaeHours,availableSpots,supervisorId,status,scopes}= data;
     
     const conn = await pool.getConnection();
@@ -35,11 +44,12 @@ export const crearActividadModel =async(data)=>{
 
     await conn.execute(query,[id,title,description,degreeId,startDate,endDate,voaeHours,availableSpots,supervisorId]);
 
-    scopes.forEach( async (scope) => {
+    // Usar for...of en lugar de forEach para manejar async correctamente
+    for (const scope of scopes) {
         const queryActividad_scope = `insert into activityScopes(activityId,scope)
         values(?,?)`;
         await conn.execute(queryActividad_scope,[id,scope]);
-    });
+    }
 
     conn.commit();
     return;
@@ -50,11 +60,22 @@ export const crearActividadModel =async(data)=>{
         conn.release();
     }
 
+    }
 }
 
-export const putActividadbyidModel =async(data)=>{
-   const {actividadId,title,description,startDate,endDate,voaeHours,
-availableSpots,supervisorId,scopes,isDisable}= data;
+
+export class ValitateUpdateActivitiesModel {
+    static validateActivitiesDelete = async(actividadId)=>{
+        const queryIsdelete = `select isDeleted from activities where id =?`;
+    
+        const [rows] = await pool.query(queryIsdelete,[actividadId]);
+        return rows[0].isDeleted;
+    }
+
+    static putActividadbyidModel =async(data)=>{
+    const {actividadId,title,description,startDate,endDate,voaeHours,
+    availableSpots,supervisorId,scopes,isDisable}= data;
+
     const conn = await pool.getConnection();
     try {
     await conn.beginTransaction();
@@ -68,13 +89,12 @@ availableSpots,supervisorId,actividadId]);
 
     const queryDeleteAmbito= `Delete from activityScopes where activityId=?`
     await conn.execute(queryDeleteAmbito,[actividadId])
-    
-    scopes.forEach( async (scope) => {
+    for (const scope of scopes) {
         const queryActividad_scope = `insert into activityScopes(activityId,scope)
         values(?,?)`;
         await conn.execute(queryActividad_scope,[actividadId,scope]);
-    });
-    
+    }
+
     await deshabilitarActividad(isDisable, actividadId, conn);
     await habilitarActividad(isDisable, actividadId, conn);
 
@@ -87,11 +107,44 @@ availableSpots,supervisorId,actividadId]);
         conn.release();
     }
 }
+}
+export class ValidateDeleteActivitiesModel {
+    static validateActivitiesModel =async(id)=>{
+        const queryInscripcion = `select *from registrations where activityId = ?`;
+        const [registros] = await pool.query(queryInscripcion,[id]);
+        
+        const queryDeleted = `select status,isDeleted from activities where id = ?`;
+        const [rows] = await pool.query(queryDeleted,[id]);
+        
+        return {
+            inscripcion:registros[0],
+            status:rows[0].status,
+            isDeleted:rows[0].isDeleted,
+        };
+    }
 
-export const deleteActividadByidModel =async(id)=>{
+    static deleteActivitiesModel =async(id)=>{
         const query = `update activities 
         set isDeleted ='true'
         where id =?`
         await pool.query(query,[id]);
+    }
 }
 
+export class finishedActivityModel {
+   static finishedActivityModel = async (id) => {
+        const query = `update activities
+        set status='finished', endDate=DATE_SUB(NOW(), INTERVAL 12 HOUR)
+        where id = ? and isDeleted='false'`;
+
+        await pool.query(query, [id]);
+
+        const queryendDate = `select startDate, endDate from activities where id = ? and isDeleted='false'`;
+        const [rows] = await pool.query(queryendDate, [id]);
+        return {
+            startDate: rows[0].startDate,
+            endDate: rows[0].endDate
+        };
+   }
+
+}

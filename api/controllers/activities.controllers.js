@@ -1,4 +1,4 @@
-import { crearActividadModel, deleteActividadByidModel, getActividadbyIdModel, getActividadModel, putActividadbyidModel
+import {finishedActivityModel, getActividadbyIdModel, getActividadModel, ValidateCreateActivitiesModel, ValidateDeleteActivitiesModel, ValitateUpdateActivitiesModel
 } from "../models/activitiesModel/activities.model.js"
 import { registerAttendanceModel, getAttendanceModel, updateAttendanceModel} from "../models/activitiesModel/activitiesAttendance.model.js";
 import { getActivitiesFilesModel, postActivitiesFilesModel } from "../models/activitiesModel/activitiesFile.model.js";
@@ -54,7 +54,7 @@ export class ActivitiesController {
         data.degreeId = 1
 
         try {
-            await crearActividadModel(data);
+            await ValidateCreateActivitiesModel.crearActividadModel(data);
             res.status(201).json({message:`Actividad creada con exito`});
         } catch (error) {
             res.status(400).json({message:`hubo un error al crear la data`,error})
@@ -70,22 +70,64 @@ export class ActivitiesController {
         if(!success){
             return res.status(400).json({message:`Hubo un error al validar la data`,error}) 
         }
-        
+
         try {
-            const response = await putActividadbyidModel(safedata);
+            const result = await ValitateUpdateActivitiesModel.validateActivitiesDelete(id);
+                if(result==='true'){
+                    return res.status(400).json({message:`No se puede actualizar una actividad eliminada`});
+                }
+
+            const response = await ValitateUpdateActivitiesModel.putActividadbyidModel(safedata);
             res.json({message:`La actividad ha sido actualizada con exito`,response})
         } catch (error) {
-            res.status(500).json({message:`Hubo un problema al actualizar la actividad`})
+            res.status(500).json({message:`Hubo un problema al actualizar la actividad`, error})
         }
     }   
 
     static deleteActividadByidController =async(req,res)=>{
         const {id}= req.params;
         try {
-            const response = await deleteActividadByidModel(id);
-            res.json({message:`Actividad eliminada correctamente`, response})
+            const {inscripcion,status,isDeleted} = await ValidateDeleteActivitiesModel.validateActivitiesModel(id);
+
+            if(inscripcion){
+                return res.status(400).json({message:`La actividad no se puede eliminar por que tiene estudiantes inscritos`})
+            }
+
+            
+          if(isDeleted==='true'){
+                return res.status(400).json({message:`La actividad ya esta eliminada`})
+            }
+            
+            if(!status){
+                return res.status(400).json({message:`Actividad no encontrada`})
+            }
+
+            if(status==='inProgress'){
+                return res.json({message:`Actividad en proceso no puede ser eliminada `});
+            }else if(status==='finished'){
+                return res.json({message:`Actividad finalizada no puede ser eliminada`});
+            }
+            
+            await ValidateDeleteActivitiesModel.deleteActivitiesModel(id);
+            return res.json({message:`Actividad eliminada exitosamente`});
         } catch (error) {
             res.status(500).json({message:`Hubo un problema al eliminar la actividad`,error})
+        }
+    }
+
+    static finishedActivityController = async (req, res) => {
+        const {id} = req.params;
+
+        try {
+            const {startDate,endDate} = await finishedActivityModel.finishedActivityModel(id);
+            //Todo: Horas totales para calcular las horas voae dependiendo de la fecha de entrada y salida del estudiante
+            const horasTotales= endDate - startDate;
+
+            finishedActivityModel.finishedActivityModel(id);
+
+            res.json({message:`Actividad finalizada con exito`, startDate, endDate});
+        } catch (error) {
+            res.status(500).json({message:`Hubo un problema al finalizar la actividad`, error})
         }
     }
 }
@@ -156,7 +198,7 @@ export class ActivitiesInscripcionesController {
 
         }
         catch (error) {
-            res.status(500).json({message:'Hubo un problema al cerrar la actividad', error})
+            res.status(500).json({message:'Hubo un problema al cerrar la actividad', error}) 
         }
 
     }
@@ -214,7 +256,7 @@ export class ActivitiesAttendanceController {
         if(!success){
             return res.status(400).json({message:'Los datos de asistencia son inválidos',error});
         }
-
+        //Todo: Calcular horas VOAE sacar el porcentaje de horas que estuvo el estudiante en la actividad y compararlo con las horas totales de la actividad 
         try {
 
             const response = await updateAttendanceModel(activityid, userid, data);
