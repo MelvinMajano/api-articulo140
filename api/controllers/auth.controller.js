@@ -1,0 +1,182 @@
+import {v4 as uuidv4} from "uuid"
+import { RegisterUserBD,GetUserByEmailDB, VerifyPasswordDB,ChangePassDb,userExist } from "../models/auth.model.js"
+import { FilterData,LoginData,UpdateP } from "../schemas/Auth.Schema.js"
+import bcrypt from "bcrypt"
+import {Resend} from "resend"
+import dotenv from 'dotenv'
+import jwt from 'jsonwebtoken' 
+
+export default class AuthController {
+
+
+
+    static  RegisterUser = async (req,res)=>{
+        const {name,email,password,accountNumber,identityNumber,role,degreeId} = req.body
+        const data={name,email,password,accountNumber,identityNumber,role,degreeId}
+        
+        try{
+
+            const filtrado = await FilterData(data)
+            
+
+            if (!filtrado.success) {
+                return res.status(400).json({
+                 message: "Error al validar los datos",
+                errors: filtrado.error.format(),  
+             });
+}
+        const id = uuidv4()
+        
+        
+        const hash_password = await bcrypt.hash(password, 10)
+        
+            
+            
+           
+            const resultado = await RegisterUserBD([id,name,email,hash_password,accountNumber,identityNumber,role,degreeId])
+            
+            
+          
+            if(resultado){
+                res.status(201).json({message:"Registro con Exito",resultado})
+            }
+        }catch(error){
+                        res.status(500).json({message: 'Error al registrar usuario', error});
+
+            
+        }
+
+    }
+
+   
+static LoginUser = async (req, res) => {
+    const { email, password } = req.body;
+    const data = { email, password };
+
+    try {
+        
+        const Filtrado = await LoginData(data);
+        console.log("hola")
+        if (!Filtrado.success) {
+            return res.status(400).json({
+                message: "Error al validar los datos",
+                errors: Filtrado.error.format(),
+            });
+        }
+
+        
+        const user = await GetUserByEmailDB(email); // esta función debe traer el usuario desde la BD
+        
+        console.log(user)
+        if (!user ||user.length ===0) {
+            return res.status(404).json({ message: "Usuario no encontrado o Contraseña incorrecta" });
+        }
+
+        
+        const match = await bcrypt.compare(password, user[0].password);
+        
+        if (!match) {
+            return res.status(401).json({ message: "Contraseña o Correo incorrecto " });
+        }
+
+        
+        const payload = {
+            email: user[0].email,
+            role: user[0].role,
+            id : user[0].id
+        };
+
+        const token = jwt.sign(payload, process.env.JWT_SECRET, {
+            expiresIn: "12h",
+        });
+
+        return res.status(200).json({
+            message: "Inicio de sesión exitoso",
+            token: token,
+        });
+
+    } catch (error) {
+        return res.status(500).json({ message: "Error en el login", error });
+    }
+}
+
+
+static UpdatePassword = async (req,res)=>{
+
+    const {authorization} = req.headers
+    const{password , NewPassword } = req.body
+    const {id} = req.params
+    const data={password,NewPassword}
+
+    
+
+    
+
+    
+
+    try{
+
+
+        const exist = await userExist(id)
+        const filtrado = await UpdateP(data)
+
+        if(!exist || exist.length===0){
+             return res.status(404).json({ message: "usuario no existe" });
+        }
+        
+        if (!filtrado.success) {
+            return res.status(400).json({
+                message: "Error al validar los datos",
+                errors: filtrado.error.format(),
+            });
+        }
+
+        const token = authorization.split(' ')[1]
+       
+        const decoded = jwt.verify(token,process.env.JWT_SECRET)
+        
+
+        
+        
+        const hash_password_New = await bcrypt.hash(NewPassword,10)
+        
+        
+        const Pass = await VerifyPasswordDB(decoded.email,decoded.id)
+
+        console.log(Pass)
+
+        if(!Pass || Pass.length===0){
+             return res.status(404).json({ message: "Contraseña no concuerda" });
+        }
+        
+        const match = await bcrypt.compare(password, Pass[0].password);
+        
+        if (!match) {
+            return res.status(401).json({ message: "Contraseña No coincide " });
+        }
+        
+
+
+        console.log(hash_password_New,decoded.id)
+        const resultado = await ChangePassDb(hash_password_New,decoded.id)
+        console.log("paso")
+
+        if(resultado){
+                res.status(201).json({message:"Contraseña Actualizada conn Exito ",resultado})
+            }
+        
+
+        
+
+
+    }catch(error){return res.status(500).json({ message: "Error Al cambiar Contraseña", error });}
+
+
+    
+}
+
+
+
+
+
+}

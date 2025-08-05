@@ -3,6 +3,8 @@ import cors from "cors"
 import dotenv from "dotenv"
 import activitiesRouter from "./api/routes/activities.routes.js";
 import "./api/utils/activities/statusUpdater.js"
+import AuthRouter from "./api/routes/auth.routes.js";
+
 
 const app=express()
 
@@ -18,6 +20,7 @@ app.use(cors({
 }))
 
 app.use('/api/activities',activitiesRouter)
+app.use("/api/auth",AuthRouter)
 
 app.use((req,res)=>{
     res.status(404).json({message:`${req.url} no fue encontrada`})

@@ -1,0 +1,38 @@
+import { pool } from "../config/db.js";
+
+export const RegisterUserBD = async (users) =>{
+
+    const query = 'INSERT INTO users (id,name,email,password,accountNumber,identityNumber,role,degreeId) values(?,?,?,?,?,?,?,?)'
+
+    const [resultado] = await pool.query(query,[...users])
+
+    return resultado
+}
+
+export const GetUserByEmailDB = async (user)=>{
+
+    const query = "Select * from users where email = ?"
+
+    const [resultado] = await pool.query(query,user)
+    return resultado
+}
+
+export const ChangePassDb = async (password,id) =>{
+    const query = "UPDATE users SET password = ? WHERE id = ?"
+    const [resultado] = await pool.query(query,[password,id])
+    return resultado
+}
+
+export const VerifyPasswordDB = async (email,id) =>{
+    const query= "Select password,email from users where email=? and id =?"
+
+    const [resultado] = await pool.query(query,[email,id])
+    return resultado
+}
+
+export const userExist = async (id)=>{
+    const query= "Select * from users where id=?"
+
+    const [resultado] = await pool.query(query,id)
+    return resultado
+}
