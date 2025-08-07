@@ -23,6 +23,7 @@ CREATE TABLE users (
     identityNumber VARCHAR(20),
     role ENUM('admin', 'student', 'supervisor') NOT NULL,
     degreeId INT NOT NULL DEFAULT 1,
+    isDeleted ENUM('true', 'false') NOT NULL DEFAULT 'false',
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -105,6 +106,7 @@ CREATE TABLE attendances (
     entryTime DATETIME NOT NULL,
     exitTime DATETIME,
     observations TEXT,
+    hoursAwarded INT DEFAULT NULL,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );

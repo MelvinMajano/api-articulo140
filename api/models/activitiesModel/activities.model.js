@@ -130,21 +130,3 @@ export class ValidateDeleteActivitiesModel {
         await pool.query(query,[id]);
     }
 }
-
-export class finishedActivityModel {
-   static finishedActivityModel = async (id) => {
-        const query = `update activities
-        set status='finished', endDate=DATE_SUB(NOW(), INTERVAL 12 HOUR)
-        where id = ? and isDeleted='false'`;
-
-        await pool.query(query, [id]);
-
-        const queryendDate = `select startDate, endDate from activities where id = ? and isDeleted='false'`;
-        const [rows] = await pool.query(queryendDate, [id]);
-        return {
-            startDate: rows[0].startDate,
-            endDate: rows[0].endDate
-        };
-   }
-
-}

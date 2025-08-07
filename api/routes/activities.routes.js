@@ -9,7 +9,7 @@ activitiesRouter.get('/:id',ActivitiesController.getActividadbyIdController);
 activitiesRouter.post('/',ActivitiesController.crearActividadController);
 activitiesRouter.put('/:id',ActivitiesController.putActividadbyidController);
 activitiesRouter.delete('/:id',ActivitiesController.deleteActividadByidController);
-activitiesRouter.put('/:id/finish', ActivitiesController.finishedActivityController);
+
 
 //logica de asistencia
 activitiesRouter.post('/:registerid/attendance',ActivitiesAttendanceController.createAttendance);

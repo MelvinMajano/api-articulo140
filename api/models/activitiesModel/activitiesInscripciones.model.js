@@ -66,6 +66,12 @@ export const closeInscriptionsModel = async (activityID) => {
         cnn.release();
     }
 }
+//TODO: Logica Sugerida
+        // const query = `update activities
+        // set status='finished', endDate=DATE_SUB(NOW(), INTERVAL 12 HOUR)
+        // where id = ? and isDeleted='false'`;
+
+        // await pool.query(query, [id]);
 
 export const closeActivityModel = async (activityID) => {
 

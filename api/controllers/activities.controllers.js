@@ -7,6 +7,8 @@ import { validateAttendance } from "../schemas/ActivitiesSchema/activitiesAttend
 import { validateActividad, validateActividadput } from "../schemas/ActivitiesSchema/activitiesSchema.js"
 import { registerStudentModel, unsubscribeStudentModel, closeInscriptionsModel, closeActivityModel } from "../models/activitiesModel/activitiesInscripciones.model.js";
 import { v4 as uuidv4 } from "uuid";
+import { calculateAllStudentsVOAE } from "../utils/activities/horasVOAECalculator.js";
+
 
 export class ActivitiesController {
     static getActividadController =async(req,res)=>{
@@ -115,21 +117,6 @@ export class ActivitiesController {
         }
     }
 
-    static finishedActivityController = async (req, res) => {
-        const {id} = req.params;
-
-        try {
-            const {startDate,endDate} = await finishedActivityModel.finishedActivityModel(id);
-            //Todo: Horas totales para calcular las horas voae dependiendo de la fecha de entrada y salida del estudiante
-            const horasTotales= endDate - startDate;
-
-            finishedActivityModel.finishedActivityModel(id);
-
-            res.json({message:`Actividad finalizada con exito`, startDate, endDate});
-        } catch (error) {
-            res.status(500).json({message:`Hubo un problema al finalizar la actividad`, error})
-        }
-    }
 }
 
 export class ActivitiesInscripcionesController {
@@ -194,6 +181,9 @@ export class ActivitiesInscripcionesController {
                 return res.status(404).json({ message: 'No se encontró la actividad para cerrar' });
             }
 
+            //TODO: Implementar la logica para que esta funcion funcione(valga la redundancia)
+            await calculateAllStudentsVOAE(id);
+
             res.json({ message: 'La actividad ha sido cerrada con éxito' });
 
         }
@@ -256,7 +246,7 @@ export class ActivitiesAttendanceController {
         if(!success){
             return res.status(400).json({message:'Los datos de asistencia son inválidos',error});
         }
-        //Todo: Calcular horas VOAE sacar el porcentaje de horas que estuvo el estudiante en la actividad y compararlo con las horas totales de la actividad 
+
         try {
 
             const response = await updateAttendanceModel(activityid, userid, data);
