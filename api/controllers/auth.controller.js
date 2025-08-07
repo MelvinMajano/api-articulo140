@@ -1,6 +1,6 @@
 import {v4 as uuidv4} from "uuid"
-import { RegisterUserBD,GetUserByEmailDB, VerifyPasswordDB,ChangePassDb,userExist } from "../models/auth.model.js"
-import { FilterData,LoginData,UpdateP } from "../schemas/Auth.Schema.js"
+import { RegisterUserBD,GetUserByEmailDB, VerifyPasswordDB,ChangePassDb,userExist, AdminChangeDb, UpdateDataDB } from "../models/auth.model.js"
+import { FilterData,LoginData,UpdateP,UpdateD } from "../schemas/Auth.Schema.js"
 import bcrypt from "bcrypt"
 import {Resend} from "resend"
 import dotenv from 'dotenv'
@@ -173,6 +173,63 @@ static UpdatePassword = async (req,res)=>{
 
 
     
+}
+
+static UpdateData = async (req,res)=>{
+    let {id:ID,name,email,degreeId,role} = req.body
+    const {id} =  req.params
+    const {authorization} = req.headers
+    const data={ID,name,email,degreeId,role}
+
+    try{
+
+        const filter = await UpdateD(data)
+        if (!filter.success) {
+            return res.status(400).json({
+                message: "Error al validar los datos",
+                errors: filter.error.format(),
+            });
+        }
+
+        const token  = authorization.split(' ')[1]
+        const decoded = jwt.verify(token,process.env.JWT_SECRET)
+        const Exist = await userExist(id)
+        
+
+        
+
+        
+
+        if(!Exist || Exist.length===0){
+            return res.status(404).json({ message: "usuario no existe" });
+        }
+
+        if(decoded.role ==="admin" && name !==undefined){
+
+            const result = await AdminChangeDb(ID,role)
+            
+
+            return res.status(201).json({message:"Actualizacion de Rol Exitosa"})
+
+        }
+        console.log(Exist)
+        if(name === undefined){name=Exist[0].name}
+        if(email === undefined){email=Exist[0].email}
+        if(degreeId===undefined){degreeId=Exist[0].degreeId}
+
+        console.log(name,email,degreeId)
+        const Update = await UpdateDataDB(name,email,degreeId,id)
+       
+        if(Update){
+                res.status(201).json({message:"Actualizacion de Datos con Exito  ",Update})
+            }
+
+
+        
+
+        
+    }catch(error){
+        return res.status(500).json({ message: "Error Al Actualizar Datos", error });}
 }
 
 
