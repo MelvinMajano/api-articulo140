@@ -1,3 +1,4 @@
+import { de } from "zod/locales";
 import { pool } from "../config/db.js";
 
 export const RegisterUserBD = async (users) =>{
@@ -35,4 +36,18 @@ export const userExist = async (id)=>{
 
     const [resultado] = await pool.query(query,id)
     return resultado
+}
+
+export const AdminChangeDb = async (id,role)=>{
+    const query = "UPDATE users set role = ? where id = ?"
+
+    const [resultado] = await pool.query(query,[id,role])
+    return resultado
+}
+
+export const UpdateDataDB= async (name,email,degreeId,id)=>{
+    const query = "Update users set name = ? ,email = ? , degreeId=? where id = ?"
+
+    const [result] = await pool.query(query,[name,email,degreeId,id])
+    return result
 }

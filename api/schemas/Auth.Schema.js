@@ -1,4 +1,5 @@
 import zod from "zod"
+import { da } from "zod/locales";
 
 const RegisterUserSchema = zod.object({
   name: zod
@@ -85,4 +86,31 @@ const PasswordUpdateSchema = zod.object({
 
 export const UpdateP = async  (data) =>{
   return PasswordUpdateSchema.safeParse(data)
+}
+
+const UpdateDataSchema = zod.object({
+
+  name: zod
+    .string()
+    .min(2, 'El nombre debe tener al menos 2 caracteres')
+    .max(100, 'El nombre es demasiado largo')
+    .regex(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/, 'El nombre no debe contener caracteres especiales ni números')
+    .optional(),
+    
+    email: zod
+    .string()
+    .email('Debe ser un correo válido').optional(),
+
+    degreeId: zod
+    .number()
+    .min(1, 'Debe ser mayor o igual a 1').optional(),
+
+    id: zod
+    .uuidv4().optional()
+
+
+})
+
+export const UpdateD = async (data)=>{
+  return UpdateDataSchema.safeParse(data)
 }
