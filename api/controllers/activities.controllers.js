@@ -1,4 +1,4 @@
-import {finishedActivityModel, getActividadbyIdModel, getActividadModel, ValidateCreateActivitiesModel, ValidateDeleteActivitiesModel, ValitateUpdateActivitiesModel
+import { getActividadbyIdModel, getActividadModel, ValidateCreateActivitiesModel, ValidateDeleteActivitiesModel, ValitateUpdateActivitiesModel
 } from "../models/activitiesModel/activities.model.js"
 import { registerAttendanceModel, getAttendanceModel, updateAttendanceModel} from "../models/activitiesModel/activitiesAttendance.model.js";
 import { getActivitiesFilesModel, postActivitiesFilesModel } from "../models/activitiesModel/activitiesFile.model.js";

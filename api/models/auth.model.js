@@ -51,3 +51,11 @@ export const UpdateDataDB= async (name,email,degreeId,id)=>{
     const [result] = await pool.query(query,[name,email,degreeId,id])
     return result
 }
+
+export const DeleteUserDB = async (id)=>{
+    const query="UPDATE users set isDeleted = TRUE where id = ?"
+
+    const [result] = await pool.query(query,[id])
+
+    return result
+}

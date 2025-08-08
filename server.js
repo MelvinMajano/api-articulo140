@@ -22,6 +22,7 @@ app.use(cors({
 app.use('/api/activities',activitiesRouter)
 app.use("/api/auth",AuthRouter)
 
+
 app.use((req,res)=>{
     res.status(404).json({message:`${req.url} no fue encontrada`})
 })

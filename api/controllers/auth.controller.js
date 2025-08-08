@@ -1,6 +1,6 @@
 import {v4 as uuidv4} from "uuid"
-import { RegisterUserBD,GetUserByEmailDB, VerifyPasswordDB,ChangePassDb,userExist, AdminChangeDb, UpdateDataDB } from "../models/auth.model.js"
-import { FilterData,LoginData,UpdateP,UpdateD } from "../schemas/Auth.Schema.js"
+import { RegisterUserBD,GetUserByEmailDB, VerifyPasswordDB,ChangePassDb,userExist, AdminChangeDb, UpdateDataDB,DeleteUserDB } from "../models/auth.model.js"
+import { FilterData,LoginData,UpdateP,UpdateD, DeleteidUser } from "../schemas/Auth.Schema.js"
 import bcrypt from "bcrypt"
 import {Resend} from "resend"
 import dotenv from 'dotenv'
@@ -232,7 +232,44 @@ static UpdateData = async (req,res)=>{
         return res.status(500).json({ message: "Error Al Actualizar Datos", error });}
 }
 
+static DeleteUser=async (req,res)=>{
 
+    const {id}=req.params
+    const data={id}
+   try{
+     const filter  = await DeleteidUser(data)
+
+    if (!filter.success) {
+            return res.status(400).json({
+                message: "Error con el ID",
+                errors: filter.error.format(),
+            });
+        }
+    
+    const Exist = await userExist(id)
+        
+
+        
+
+        
+
+        if(!Exist || Exist.length===0){
+            return res.status(404).json({ message: "usuario no existe" });
+        }    
+        
+    const result = await DeleteUserDB(id)   
+    
+
+    if(result){
+                res.status(201).json({message:"Actualizacion de Datos con Exito  ",result})
+            }
+
+   }catch(error){ return res.status(500).json({ message: "Error Al Eliminar Usuario", error })}
+
+
+
+
+}
 
 
 

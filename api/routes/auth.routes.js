@@ -11,6 +11,7 @@ AuthRouter.post("/register",AuthController.RegisterUser)
 AuthRouter.post("/login",AuthController.LoginUser)
 AuthRouter.put("/password/:id",verifyToken,AuthController.UpdatePassword)
 AuthRouter.put("/data/:id",verifyToken,AuthController.UpdateData)
+AuthRouter.delete("/delete/:id",verifyToken,AuthController.DeleteUser)
 
 
 

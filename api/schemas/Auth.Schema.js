@@ -31,11 +31,11 @@ const RegisterUserSchema = zod.object({
     .string()
     .regex(/^\d{13,15}$/, 'Debe contener entre 13 y 15 dígitos numéricos'),
 
-  role: zod.array(zod.enum(['admin', 'student', 'supervisor'])),
+   role: zod
+   .enum(["admin", "student", "supervisor"]),
 
   degreeId: zod
-    .number()
-    .min(1, 'Debe ser mayor o igual a 1')
+  .number().min(1)
 }).strict();
 
 
@@ -113,4 +113,14 @@ const UpdateDataSchema = zod.object({
 
 export const UpdateD = async (data)=>{
   return UpdateDataSchema.safeParse(data)
+}
+
+const DeleteUser = zod.object({
+  id: zod
+  
+  .uuidv4()
+}).strict()
+
+export const DeleteidUser = async (id)=>{
+  return DeleteUser.safeParse(id)
 }
