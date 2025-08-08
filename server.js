@@ -4,6 +4,7 @@ import dotenv from "dotenv"
 import activitiesRouter from "./api/routes/activities.routes.js";
 import "./api/utils/activities/statusUpdater.js"
 import AuthRouter from "./api/routes/auth.routes.js";
+import UserRouter from "./api/routes/users.routes.js"
 
 
 const app=express()
@@ -21,7 +22,7 @@ app.use(cors({
 
 app.use('/api/activities',activitiesRouter)
 app.use("/api/auth",AuthRouter)
-app.use("/api/users")
+app.use("/api/users",UserRouter)
 
 
 app.use((req,res)=>{
