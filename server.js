@@ -21,6 +21,7 @@ app.use(cors({
 
 app.use('/api/activities',activitiesRouter)
 app.use("/api/auth",AuthRouter)
+app.use("/api/users")
 
 
 app.use((req,res)=>{
