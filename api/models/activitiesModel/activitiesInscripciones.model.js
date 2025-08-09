@@ -1,15 +1,34 @@
 import {pool} from "../../config/db.js"
 
-export const registerStudentModel = async (id,studentID, activityID) => {
+export const studentExists = async (studentID) => {
+
+    const cnn = await pool.getConnection();
+
+    const [rows] = await cnn.execute(`select * from users where id = ?`, [studentID]);
+    
+    return rows
+}
+
+export const activityExists = async (activityID) => {
+
+    const cnn = await pool.getConnection();
+
+    const [rows] = await cnn.execute(`select * from activities where id = ?`, [activityID]);
+
+    return rows
+}
+
+export const registerStudentModel = async (studentID, activityID) => {
 
     const cnn = await pool.getConnection();
     await cnn.beginTransaction();
 
-    try  {
-        const query = `insert into registro (id,actividad_id,estudiante_id,estado_registro_id, fecha_inscripcion)
-                       values (?, ? , ? , 1, NOW())` 
+     const query = `insert into registrations (studentId,activityId, registrationDate)
+                    values (?, ?, CURDATE())`;
 
-        await cnn.execute(query, [id, activityID, studentID])
+    try  {
+
+        await cnn.execute(query, [studentID, activityID])
 
         cnn.commit();
         
@@ -27,15 +46,14 @@ export const unsubscribeStudentModel = async (studentID, activityID) => {
     const cnn = await pool.getConnection();
     await cnn.beginTransaction();
 
+    const query = `delete from registrations where studentId = ? and activityId = ?`
+
     try {
 
-        const query = `delete from registro where actividad_id = ? and estudiante_id = ?`
-
-        const [rows] = await cnn.execute(query, [activityID,studentID])
+        await cnn.execute(query, [studentID, activityID])
 
         cnn.commit()
 
-        return rows;
 
     } catch (error) {
         cnn.rollback();
@@ -49,15 +67,15 @@ export const closeInscriptionsModel = async (activityID) => {
 
     const cnn = await pool.getConnection();
     await cnn.beginTransaction();
-
+   
     try{
-        
-        const query = `update registro set estado_registro_id = 2 where actividad_id = ?`
 
-        const [rows] = await cnn.execute(query, [activityID]);
+        const query = `update activities set status = 2 where id = ?`;
+
+        await cnn.execute(query, [activityID]);
 
         cnn.commit();
-        return rows;
+
 
     } catch (error) {
         cnn.rollback();
@@ -66,12 +84,8 @@ export const closeInscriptionsModel = async (activityID) => {
         cnn.release();
     }
 }
-//TODO: Logica Sugerida
-        // const query = `update activities
-        // set status='finished', endDate=DATE_SUB(NOW(), INTERVAL 12 HOUR)
-        // where id = ? and isDeleted='false'`;
 
-        // await pool.query(query, [id]);
+        
 
 export const closeActivityModel = async (activityID) => {
 
@@ -80,12 +94,12 @@ export const closeActivityModel = async (activityID) => {
 
     try{
 
-        const query = ` update actividad set estado_id = 3 where id = ? `
+        const query = `update activities
+        set status='finished', endDate=DATE_SUB(NOW(), INTERVAL 12 HOUR)
+        where id = ? and isDeleted='false'`;
 
-        const [rows] = await cnn.execute(query, [activityID]);
-        cnn.commit();   
-
-        return rows;
+        await cnn.execute(query, [activityID]);
+        cnn.commit();
 
     } catch (error) {
         cnn.rollback();
