@@ -6,14 +6,14 @@
 - POST   `/api/auth/login`                → Login de usuario  
 - PUT    `/api/auth/password/:id`         → Cambiar contraseña  
 - PUT    `/api/auth/data/:id`             → Actualizar datos del usuario  
-- DELETE `/api/auth/register/:id`         → Eliminar usuario  
+- DELETE `/api/auth/delete/:id`         → Eliminar usuario  (Forma Logica)
 
 ---
 
 ##  Users (Usuarios)
 
 - GET    `/api/users/:id/activities`                        → Ver actividades en las que participó el usuario  
-- GET    `/api/users/:id/fields/:fieldid`                  → Ver horas vinculadas en un campo específico   
+- GET    `/api/users/:id/fields`                  → Ver horas vinculadas  
 
 ---
 
