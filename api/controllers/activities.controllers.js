@@ -5,6 +5,7 @@ import { getActivitiesFilesModel, postActivitiesFilesModel } from "../models/act
 import { validateFile } from "../schemas/ActivitiesSchema/activitiesFileShema.js";
 import { validateAttendance } from "../schemas/ActivitiesSchema/activitiesAttendanceSchema.js";
 import { validateActividad, validateActividadput } from "../schemas/ActivitiesSchema/activitiesSchema.js"
+import { validateDegree } from "../schemas/ActivitiesSchema/activitiesDegreesSchema.js";
 import { studentExists,activityExists,registerStudentModel, unsubscribeStudentModel, closeInscriptionsModel, closeActivityModel } from "../models/activitiesModel/activitiesInscriptions.model.js";
 import { degreeExistsModel,hasConflictDegreeModel, createDegreeModel, updateDegreeModel, deleteDegreeModel, getDegreesModel } from "../models/activitiesModel/activitiesDegrees.model.js";
 import { v4 as uuidv4 } from "uuid";
@@ -227,6 +228,15 @@ export class ActivitiesDegreesController {
 
         const degree = req.body;
 
+        const { success, error } = await validateDegree(degree);
+
+        if (!success) {
+            return res.status(400).json({ 
+                message: "Error al validar los datos",
+                errors: error.format(),   
+            });
+        }
+
         try {
             await createDegreeModel(degree);
             res.status(201).json({ message: "Carrera creada con éxito" });
@@ -247,6 +257,15 @@ export class ActivitiesDegreesController {
     static updateDegree = async (req, res) => {
         const { id } = req.params;
         const degree = req.body;
+
+        const { success, error } = await validateDegree(degree);
+
+        if (!success) {
+            return res.status(400).json({ 
+                message: "Error al validar los datos",
+                errors: error.format(),   
+            });
+        }
 
         const degreeExist = await degreeExistsModel(id);
 
