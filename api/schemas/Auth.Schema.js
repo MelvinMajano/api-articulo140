@@ -115,12 +115,12 @@ export const UpdateD = async (data)=>{
   return UpdateDataSchema.safeParse(data)
 }
 
-const DeleteUser = zod.object({
+const ValidID = zod.object({
   id: zod
   
   .uuidv4()
 }).strict()
 
-export const DeleteidUser = async (id)=>{
-  return DeleteUser.safeParse(id)
+export const IDv = async (id)=>{
+  return ValidID.safeParse(id)
 }

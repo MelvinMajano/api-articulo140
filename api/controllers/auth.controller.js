@@ -1,6 +1,6 @@
 import {v4 as uuidv4} from "uuid"
 import { RegisterUserBD,GetUserByEmailDB, VerifyPasswordDB,ChangePassDb,userExist, AdminChangeDb, UpdateDataDB,DeleteUserDB } from "../models/auth.model.js"
-import { FilterData,LoginData,UpdateP,UpdateD, DeleteidUser } from "../schemas/Auth.Schema.js"
+import { FilterData,LoginData,UpdateP,UpdateD, IDv} from "../schemas/Auth.Schema.js"
 import bcrypt from "bcrypt"
 import {Resend} from "resend"
 import dotenv from 'dotenv'
@@ -41,7 +41,7 @@ export default class AuthController {
                 res.status(201).json({message:"Registro con Exito",resultado})
             }
         }catch(error){
-                        res.status(500).json({message: 'Error al registrar usuario', error});
+                      return   res.status(500).json({message: 'Error al registrar usuario', error});
 
             
         }
@@ -237,7 +237,7 @@ static DeleteUser=async (req,res)=>{
     const {id}=req.params
     const data={id}
    try{
-     const filter  = await DeleteidUser(data)
+     const filter  = await IDv(data)
 
     if (!filter.success) {
             return res.status(400).json({
@@ -248,11 +248,6 @@ static DeleteUser=async (req,res)=>{
     
     const Exist = await userExist(id)
         
-
-        
-
-        
-
         if(!Exist || Exist.length===0){
             return res.status(404).json({ message: "usuario no existe" });
         }    
