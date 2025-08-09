@@ -27,6 +27,13 @@
 - PUT    `/api/activities/:id`                     → Actualizar actividad  
 - DELETE `/api/activities/:id`                     → Eliminar (lógicamente) actividad  
 
+### Carreras
+- GET    `/api/activities/degrees`                         → Ver todas las actividades
+- POST   `/api/activities/degrees`                         → Crear nueva actividad  
+- PUT    `/api/activities/degrees/:id`                     → Actualizar actividad  
+- DELETE `/api/activities/degrees/:id`                     → Eliminar (lógicamente) actividad  
+
+
 ### Asistencias
 - POST   `/api/activities/:registerid/attendance`           → Registrar asistencias
 - GET    `/api/activities/:activityid/attendance`           → Ver asistencias de la actividad  
