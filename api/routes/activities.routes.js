@@ -21,9 +21,8 @@ activitiesRouter.put('/:id',ActivitiesController.putActividadbyidController);
 activitiesRouter.delete('/:id',ActivitiesController.deleteActividadByidController);
 
 //logica de asistencia
-activitiesRouter.post('/:registerid/attendance',ActivitiesAttendanceController.createAttendance);
-activitiesRouter.get('/:activityid/attendance', ActivitiesAttendanceController.viewAttendancebyId)
-activitiesRouter.put('/:activityid/attendance/:userid', ActivitiesAttendanceController.updateUserAttendance);
+activitiesRouter.post('/attendance',ActivitiesAttendanceController.createAttendance);
+activitiesRouter.get('/:activityid/attendance', ActivitiesAttendanceController.viewAttendancebyId);
 
 //Logica de inscripciones
 activitiesRouter.post('/:activityid/register/:id', ActivitiesInscriptionsController.registeStudentinActivity)

@@ -1,19 +1,23 @@
 import { pool } from "../../config/db.js";
 
-export const registerAttendanceModel = async (data) => {
-  const {id, registro_id, hora_entrada, hora_salida } = data;
+export const registerAttendanceModel = async (attendances) => {
+  
   const cnn = await pool.getConnection();
+  const query =  `insert into attendances (id,studentId,activityId,entryTime,exitTime,observations)
+                  values (?, ?, ?, ?, ?, ?)`
+
 
   try {
     await cnn.beginTransaction();
+    
+    for (const att of attendances) {
 
-    const query = `insert into asistencia(id,registro_id,hora_entrada,hora_salida,created_at) 
-                   values (?, ? , ? , ? , NOW())`;
+       const { id, studentId, activityId, entryTime, exitTime, observations } = att;
 
-    const [rows] = await cnn.execute(query, [id, registro_id, hora_entrada, hora_salida]);
-
+       await cnn.execute(query, [id, studentId, activityId, entryTime, exitTime, observations]);
+    }
+      
     cnn.commit();
-    return rows;
 
   } catch (error) {
     cnn.rollback();
@@ -29,45 +33,17 @@ export const getAttendanceModel = async (activityID) => {
 
   try{
 
-    const query = `select a.titulo,u.nombre, u.numero_cuenta ,asist.hora_entrada, asist.hora_salida 
-                   from actividad as a 
-                   inner join registro as r on a.id = r.actividad_id
-                   inner join users as u on u.id = r.estudiante_id
-                   left join asistencia as asist on asist.registro_id = r.id
-                   where a.id = ?`
+    const query = `select u.name, u.accountNumber, u.email, a.entryTime, a.exitTime , a.hoursAwarded, group_concat(ac.scope) as Scope 
+                   from attendances as a
+                   inner join users as u on u.id = a.studentId
+                   inner join activityScopes as ac on ac.activityId = a.activityId
+                   where a.activityId = ?
+                   group by  u.name, u.accountNumber, u.email, a.entryTime, a.exitTime, a.hoursAwarded;`
 
     const [rows] = await cnn.execute(query, [activityID])
     return rows
 
   } catch(error) {
     throw error;
-  }
-}
-
-export const updateAttendanceModel = async (activityID, userID, data) => {
-
-  const { hora_entrada, hora_salida } = data;
-  const cnn = await pool.getConnection();
-
-  cnn.beginTransaction();
-
-  try{
-
-    const query = `update asistencia as a 
-                   join registro as r on a.registro_id = r.id
-                   join actividad as act on act.id = r.actividad_id
-                   set hora_entrada = ? , hora_salida = ?
-                   where act.id = ? and r.estudiante_id = ?`
-
-    const [rows] = await cnn.execute(query, [hora_entrada,hora_salida,activityID,userID])
-
-    await cnn.commit();
-    return rows;
-
-  } catch (error) {
-    cnn.rollback();
-    throw error;
-  } finally {
-    cnn.release();  
   }
 }

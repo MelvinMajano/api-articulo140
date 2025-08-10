@@ -37,7 +37,7 @@
 ### Asistencias
 - POST   `/api/activities/:registerid/attendance`           → Registrar asistencias
 - GET    `/api/activities/:activityid/attendance`           → Ver asistencias de la actividad  
-- PUT    `/api/activities/:activityid/attendance/:userId`   → Actualizar asistencia específica
+
 
 ### Logica para la siguiente version 
 - GET    `/api/activities/:id/files`               → Ver archivos de la actividad (2da etapa)  

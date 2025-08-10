@@ -1,24 +1,28 @@
-import { validateAttendance } from "../../schemas/ActivitiesSchema/activitiesAttendanceSchema.js";
+import { validateAttendances } from "../../schemas/ActivitiesSchema/activitiesAttendanceSchema.js";
 import { v4 as uuidv4 } from "uuid";
-import { registerAttendanceModel, getAttendanceModel, updateAttendanceModel } from "../../models/activitiesModel/activitiesAttendance.model.js";
+import { registerAttendanceModel, getAttendanceModel} from "../../models/activitiesModel/activitiesAttendance.model.js";
+import { formatDateHonduras } from "../../utils/activities/formatDateHonduras.js";
 
 export class ActivitiesAttendanceController {
+
     static createAttendance = async (req, res) => {
         const data = req.body
-        const {registerid} = req.params
 
-        const {success,error,data:safedata} = await validateAttendance(data);
-        if(!success){
-            return res.status(400).json({message:'Hubo un error al validar la data',error});
+        const parsed = await validateAttendances(data);
+
+        if(!parsed.success){
+            return res.status(400).json({message:'Hubo un error al validar la data', error: parsed.error.format()});
         }
 
-        safedata.id = uuidv4();
-        safedata.registro_id = registerid;
+        const safeData = parsed.data.attendances.map(attendance => ({
+              id: uuidv4(),
+              ...attendance
+        }));
 
         try {
-            const response = await registerAttendanceModel(safedata,);
+            const response = await registerAttendanceModel(safeData);
 
-            res.json({message:'Asistencia registrada con éxito'});
+            res.json({message:'Asistencias registradas con éxito'});
 
         } catch (error) {
             res.status(500).json({message:'Hubo un problema al crear la asistencia', error});
@@ -37,36 +41,17 @@ export class ActivitiesAttendanceController {
                 return res.status(404).json({message: 'No se encontraron registros de asistencia para esta actividad'});
             }
 
-            res.json(response);
+            const formattedsAttendances = response.map(attendance => ({
+                ...attendance,
+                entryTime: formatDateHonduras(attendance.entryTime),
+                exitTime: formatDateHonduras(attendance.exitTime),
+                
+            }));
+            
+            res.json(formattedsAttendances);
 
         } catch (error) {
             res.status(500).json({message:'Hubo un problema al obtener la asistencia', error});
         }
-    }
-
-    static updateUserAttendance = async (req,res) => {
-
-        const {activityid, userid} = req.params
-        const data = req.body;
-
-        const {success,error} = await validateAttendance(data);
-        if(!success){
-            return res.status(400).json({message:'Los datos de asistencia son inválidos',error});
-        }
-
-        try {
-
-            const response = await updateAttendanceModel(activityid, userid, data);
-
-            if (response.affectedRows === 0) {
-                return res.status(404).json({message: 'No se encontró el registro de asistencia para actualizar'});
-            }
-
-            res.json({message: 'Asistencia actualizada con éxito'});
-
-        } catch (error) {
-            res.status(500).json({message:'Hubo un problema al actualizar la asistencia del usuario', error});
-        }
-
     }
 }
