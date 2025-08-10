@@ -1,4 +1,4 @@
-import { getActividadbyIdModel, getActividadModel, ValidateCreateActivitiesModel, ValidateDeleteActivitiesModel, ValitateUpdateActivitiesModel
+import {getActividadbyIdModel, getActividadModel, ValidateCreateActivitiesModel, ValidateDeleteActivitiesModel, ValitateUpdateActivitiesModel
 } from "../models/activitiesModel/activities.model.js"
 import { registerAttendanceModel, getAttendanceModel, updateAttendanceModel} from "../models/activitiesModel/activitiesAttendance.model.js";
 import { getActivitiesFilesModel, postActivitiesFilesModel } from "../models/activitiesModel/activitiesFile.model.js";
@@ -42,7 +42,7 @@ export class ActivitiesController {
 
             res.status(200).json(actividad);
         } catch (error) {
-            res.status(400).json({message:'Hubo un problema al obtener la actividad '},error)
+            res.status(500).json({message:'Hubo un problema al obtener la actividad '},error)
         }
     }
 
@@ -52,13 +52,18 @@ export class ActivitiesController {
         const {success,error,data} =await validateActividad(actividadResivida);
 
         if(!success){
-            res.status(404).json({message:`Error al validar la data: ${error}`})
+            return res.status(404).json({message:`Error al validar la data: ${error}`})
         }
 
         data.id = uuidv4()
         data.degreeId = 1
 
         try {
+            const response = await ValidateCreateActivitiesModel.validateActivitiesModel(data);
+            console.log(response);
+            if(response){
+                return res.status(404).json({message:`No se puede crear una actividad en este dia ya que ya existe otra actividad en el mismo horario`});
+            }
             await ValidateCreateActivitiesModel.crearActividadModel(data);
             res.status(201).json({message:`Actividad creada con exito`});
         } catch (error) {
@@ -78,6 +83,7 @@ export class ActivitiesController {
 
         try {
             const result = await ValitateUpdateActivitiesModel.validateActivitiesDelete(id);
+
                 if(result==='true'){
                     return res.status(400).json({message:`No se puede actualizar una actividad eliminada`});
                 }
@@ -207,7 +213,9 @@ export class ActivitiesInscriptionsController {
                 return res.status(404).json({ message: "Actividad no encontrada" });
             }
 
-            await closeActivityModel(id);
+            
+            await calculateAllStudentsVOAE(id);
+
             res.json({ message: 'La actividad ha sido cerrada con éxito' });
 
             // TODO: Implementar la logica para que esta funcion funcione(valga la redundancia)

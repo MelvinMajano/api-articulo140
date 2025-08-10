@@ -7,6 +7,7 @@ export const getActividadModel =async()=>{
     const query = `select a.id, a.title,a.description,a.startDate, a.endDate, a.voaeHours, a.availableSpots,a.status,a.isDeleted, u.name as Supervisor, group_concat(ase.scope) as Scope from activities as a
     inner join users as u on a.supervisorId = u.id
     inner join activityScopes as ase on a.id = ase.activityId
+    where a.isDeleted = 'false'
     group by a.id, a.title,a.description, a.startDate, a.endDate, a.voaeHours, a.availableSpots, a.status, u.name, a.isDeleted`;
 
     const [rows] = await pool.query(query);
@@ -18,8 +19,8 @@ export const getActividadbyIdModel =async(id)=>{
 
     const query =`select a.id, a.title,a.description,a.startDate, a.endDate, a.voaeHours, a.availableSpots,a.status,a.isDeleted, u.name as Supervisor, group_concat(ase.scope) as Scope from activities as a
     inner join users as u on a.supervisorId = u.id
-    inner join activityScopes as ase on a.id = ase.activityId 
-    where a.id = ?
+    inner join activityScopes as ase on a.id = ase.activityId
+    where a.id = ? and a.isDeleted = 'false'
     group by a.id, a.title, a.description, a.startDate, a.endDate, a.voaeHours, a.availableSpots, a.status, u.name, a.isDeleted`;
 
     const [rows] = await pool.query(query,[id]);
@@ -27,10 +28,13 @@ export const getActividadbyIdModel =async(id)=>{
 }
 
 export class ValidateCreateActivitiesModel {
-    static validateActivitiesModel = async()=>{
-        const query = ``;
-        const [rows] = pool.query(query,[id]);
-        return rows
+    static validateActivitiesModel = async(data)=>{
+        const {startDate,endDate} = data;
+        const query = `select * from activities as a
+        where a.startDate < ? AND a.endDate > ?`;
+        const [rows] = await pool.query(query, [endDate, startDate]);
+        console.log(rows);
+        return rows.length > 0;
     }
 
     static crearActividadModel =async(data)=>{
@@ -44,7 +48,6 @@ export class ValidateCreateActivitiesModel {
 
     await conn.execute(query,[id,title,description,degreeId,startDate,endDate,voaeHours,availableSpots,supervisorId]);
 
-    // Usar for...of en lugar de forEach para manejar async correctamente
     for (const scope of scopes) {
         const queryActividad_scope = `insert into activityScopes(activityId,scope)
         values(?,?)`;

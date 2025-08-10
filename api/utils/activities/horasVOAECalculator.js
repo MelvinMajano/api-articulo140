@@ -14,10 +14,9 @@ export const horasVOAECalculator = async (startDate, endDate, entryTime, exitTim
     return hoursAwarded;
 };
 
-// Función principal para calcular TODAS las asistencias de una actividad
 export const calculateAllStudentsVOAE = async (activityId) => {
     try {
-        // 1. Obtener datos de la actividad
+        
         const activityQuery = `SELECT startDate, endDate, voaeHours FROM activities WHERE id = ?`;
         const [activityData] = await pool.query(activityQuery, [activityId]);
         
@@ -27,11 +26,11 @@ export const calculateAllStudentsVOAE = async (activityId) => {
         
         const { startDate, endDate, voaeHours } = activityData[0];
         
-        // 2. Obtener todas las asistencias de la actividad
+       
         const attendancesQuery = `SELECT id, entryTime, exitTime FROM attendances WHERE activityId = ? AND exitTime IS NOT NULL`;
         const [attendances] = await pool.query(attendancesQuery, [activityId]);
         
-        // 3. Calcular horas VOAE para cada asistencia
+        
         for (const attendance of attendances) {
             const { id, entryTime, exitTime } = attendance;
             await horasVOAECalculator(startDate, endDate, entryTime, exitTime, voaeHours, id);
