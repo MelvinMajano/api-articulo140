@@ -1,5 +1,9 @@
 import { Router } from "express";
-import {ActivitiesAttendanceController, ActivitiesController,ActivitiesDegreesController,ActivitiesFilesController,ActivitiesInscriptionsController} from "../controllers/activities.controllers.js";
+import { ActivitiesController } from "../controllers/ActivitiesController/activities.controller.js";
+import { ActivitiesInscriptionsController } from "../controllers/ActivitiesController/activitiesInscriptions.controller.js";
+import { ActivitiesDegreesController } from "../controllers/ActivitiesController/activitiesDegrees.controller.js";
+import { ActivitiesAttendanceController } from "../controllers/ActivitiesController/activitiesAttendance.controller.js";
+import { ActivitiesFilesController } from "../controllers/ActivitiesController/activitiesFiles.controller.js";
 
 const activitiesRouter = Router();
 

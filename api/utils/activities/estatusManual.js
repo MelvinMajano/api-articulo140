@@ -11,7 +11,7 @@ export const deshabilitarActividad = async (isDisable, actividadId, connection =
 };
 
 export const habilitarActividad = async (isDisable, actividadId, connection = null) => {
-    if (isDisable !== 0) {
+    if (isDisable !== 0) { 
         return; 
     }
     await calcularStatusPorFechas(actividadId, connection);

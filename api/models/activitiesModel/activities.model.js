@@ -7,7 +7,7 @@ export const getActividadModel =async()=>{
     const query = `select a.id, a.title,a.description,a.startDate, a.endDate, a.voaeHours, a.availableSpots,a.status,a.isDeleted, u.name as Supervisor, group_concat(ase.scope) as Scope from activities as a
     inner join users as u on a.supervisorId = u.id
     inner join activityScopes as ase on a.id = ase.activityId
-    where a.isDeleted = 'false'
+    where a.isDeleted = 'false' and a.status != 'disabled'
     group by a.id, a.title,a.description, a.startDate, a.endDate, a.voaeHours, a.availableSpots, a.status, u.name, a.isDeleted`;
 
     const [rows] = await pool.query(query);
@@ -20,7 +20,7 @@ export const getActividadbyIdModel =async(id)=>{
     const query =`select a.id, a.title,a.description,a.startDate, a.endDate, a.voaeHours, a.availableSpots,a.status,a.isDeleted, u.name as Supervisor, group_concat(ase.scope) as Scope from activities as a
     inner join users as u on a.supervisorId = u.id
     inner join activityScopes as ase on a.id = ase.activityId
-    where a.id = ? and a.isDeleted = 'false'
+    where a.id = ? and a.isDeleted = 'false' and a.status != 'disabled'
     group by a.id, a.title, a.description, a.startDate, a.endDate, a.voaeHours, a.availableSpots, a.status, u.name, a.isDeleted`;
 
     const [rows] = await pool.query(query,[id]);
