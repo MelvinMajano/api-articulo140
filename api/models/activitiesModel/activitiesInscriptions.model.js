@@ -1,3 +1,4 @@
+import { success } from "zod";
 import {pool} from "../../config/db.js"
 
 export const studentExists = async (studentID) => {
@@ -23,15 +24,29 @@ export const registerStudentModel = async (studentID, activityID) => {
     const cnn = await pool.getConnection();
     await cnn.beginTransaction();
 
-     const query = `insert into registrations (studentId,activityId, registrationDate)
-                    values (?, ?, CURDATE())`;
+     const query = `insert into registrations (studentId, activityId, registrationDate)
+                    select ?, ?, CURDATE()
+                    from activities
+                        where id = ?
+                        and availableSpots > 0
+                        and status = 'pending'`;
+
+    const queryUpdate = `update activities set availableSpots = availableSpots - 1 where id = ?`;
 
     try  {
 
-        await cnn.execute(query, [studentID, activityID])
+        const [insertResult] = await cnn.execute(query, [studentID, activityID, activityID]);
 
-        cnn.commit();
-        
+        if (insertResult.affectedRows === 0) {
+            await cnn.rollback();
+            return {success:false,message: 'No hay cupos disponibles o la actividad no está disponible para inscripciones.'};
+        }
+
+        await cnn.execute(queryUpdate, [activityID]);
+        await cnn.commit();
+
+        return {success:true,message: 'Estudiante registrado con éxito en la actividad.'};
+
     } catch (error) {
         cnn.rollback();
         throw error
@@ -47,13 +62,21 @@ export const unsubscribeStudentModel = async (studentID, activityID) => {
     await cnn.beginTransaction();
 
     const query = `delete from registrations where studentId = ? and activityId = ?`
+    const queryUpdate = `update activities set availableSpots = availableSpots + 1 where id = ?`
 
     try {
 
-        await cnn.execute(query, [studentID, activityID])
+        const [deleteResult] = await cnn.execute(query, [studentID, activityID]);
 
-        cnn.commit()
+        if (deleteResult.affectedRows === 0) {
+            await cnn.rollback();
+            return {success:false,message: 'No se pudo desuscribir al estudiante de la actividad.' };
+        }
 
+        await cnn.execute(queryUpdate, [activityID]);
+        cnn.commit();
+
+        return {success:true,message: 'Estudiante desuscrito de la actividad con éxito.' };
 
     } catch (error) {
         cnn.rollback();

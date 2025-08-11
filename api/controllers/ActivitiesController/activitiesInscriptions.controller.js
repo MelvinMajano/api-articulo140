@@ -19,9 +19,13 @@ export class ActivitiesInscriptionsController {
                return res.status(404).json({ message: "Actividad no encontrada" });
            }
 
-           await registerStudentModel(id,activityid)
+           const response = await registerStudentModel(id,activityid)
 
-           res.status(200).json({ message: "Estudiante registrado en la actividad con éxito" });
+           if (response.success === false) {
+               return res.status(400).json(response);
+           }
+
+           res.status(200).json({ message: response.message });
 
        } catch (error) {
            res.status(500).json({message:'Hubo un problema al registrar al estudiante', error})
@@ -45,9 +49,13 @@ export class ActivitiesInscriptionsController {
                return res.status(404).json({ message: "Actividad no encontrada" });
            }
 
-           await unsubscribeStudentModel(id, activityid);
+           const response = await unsubscribeStudentModel(id, activityid);
 
-           res.status(200).json({ message: "Estudiante desuscrito de la actividad con éxito" });
+           if (response.success === false) {
+               return res.status(400).json(response.message);
+           }
+
+           res.status(200).json({ message: response.message });
 
        } catch (error) {
            res.status(500).json({message:'Hubo un problema al desuscribir al estudiante', error})
