@@ -10,13 +10,13 @@ import { handleResponse } from "../utils/responseHandler.js"
 export default class UserController{
 
     static GetUserActivity = async (req,res)=>{
-        const {id} = req.params
-        const data={id}
+        const id = Object.values(req.params)[0];
+        const data=id
        try{
 
        
          const filter  = await NumbersV(data)
-         
+         console.log(filter)
         if(validateResult(filter,res)) return
         
        

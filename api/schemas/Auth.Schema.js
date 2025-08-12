@@ -126,23 +126,23 @@ export const IDv = async  (id)=>{
 }
 
 
-const ValidNumber= zod.object({
+const ValidNumber= zod.union([
+  zod.preprocess((val) => {
+    if (typeof val === "string" && /^\d+$/.test(val)) {
+      return Number(val);
+    }
+    return val;
+  }, zod.number()
+    .int()
+    .gte(10000000000)
+    .lte(99999999999)),
 
-  accountNumber: zod
-    .number()
-    .int('Debe ser un número entero')
-    .gte(10000000000, 'Debe tener exactamente 11 dígitos')
-    .lte(99999999999, 'Debe tener exactamente 11 dígitos')
-    .optional(),
+  
+zod.string().regex(/^\d{13}$|^\d{15}$/, "Debe contener exactamente 13 o 15 dígitos numéricos"),
 
-  identityNumber: zod
-    .string()
-    .regex(/^\d{13,15}$/, 'Debe contener entre 13 y 15 dígitos numéricos')
-    .optional(),
+  zod.string().uuid("Debe ser un UUID válido"),
 
-
-
-})
+]);
 
 export const NumbersV = async(N)=>{
   return ValidNumber.safeParse(N)
