@@ -31,3 +31,18 @@ const activitiesSchemaput = zod.object({
 export const validateActividadput = async(data)=>{
     return activitiesSchemaput.safeParse(data);
 }
+
+const activitiesSchemaForUser = zod.object({
+    "title":zod.string(),
+    "description":zod.string().min(5).max(500),
+    "degreeId":zod.number(),
+    "startDate":zod.coerce.date(),
+    "endDate":zod.coerce.date(),
+    "voaeHours":zod.number(),
+    "supervisorId":zod.string().uuid(),
+    "scopesId":zod.array(zod.enum(["1","2","3","4"])).min(1),
+}).strict();
+
+export const validateActivityForUser = async(data)=>{
+    return activitiesSchemaForUser.safeParse(data);
+}

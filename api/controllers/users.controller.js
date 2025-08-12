@@ -1,8 +1,9 @@
 import { IDv } from "../schemas/Auth.Schema.js"
 import { userExist } from "../models/auth.model.js"
-import { CurrentActivitiesDB, VOAEHours } from "../models/users.model.js"
-import { id } from "zod/locales"
+import { CurrentActivitiesDB, VOAEHours, registerActivityForStudentModel } from "../models/users.model.js"
+import { validateActivityForUser } from "../schemas/ActivitiesSchema/activitiesSchema.js"
 import { validateResult, validateUserDb } from "../utils/validations.js"
+import { v4 as uuidv4 } from "uuid";
 
 
 export default class UserController{
@@ -66,4 +67,34 @@ export default class UserController{
 
 
     }
+
+    static registerActivityForStudent = async (req, res) => {
+        const { id } = req.params;
+        const data = req.body
+
+        try {
+
+            const Exist = await userExist(id)
+            if(validateUserDb(Exist,res))return
+
+            const {success,error,data: filteredData} = await validateActivityForUser(data)
+
+            if(!success) {
+                return res.status(400).json({message:"Error en los datos",error})
+            }
+
+            filteredData.id = uuidv4();
+            filteredData.status = "finished"
+            filteredData.availableSpots = 0
+
+            const response = await registerActivityForStudentModel(filteredData,id)
+
+            return res.status(201).json({ message: "Actividad registrada con éxito", response })
+
+        } catch (error) {
+            return res.status(500).json({ message: "Error al registrar actividad", error}) 
+        }
+    };
 }
+
+

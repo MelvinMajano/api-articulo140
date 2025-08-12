@@ -12,8 +12,9 @@
 
 ##  Users (Usuarios)
 
-- GET    `/api/users/:id/activities`                        → Ver actividades en las que participó el usuario  
+- GET    `/api/users/:id/activities`              → Ver actividades en las que participó el usuario  
 - GET    `/api/users/:id/fields`                  → Ver horas vinculadas  
+- POST   `/api/users/:id/registerActivity`                → Registrar actividad de otra carrera a un estudiante 
 
 ---
 
