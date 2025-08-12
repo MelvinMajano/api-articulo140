@@ -32,9 +32,9 @@ export const VerifyPasswordDB = async (email,id) =>{
 }
 
 export const userExist = async (id)=>{
-    const query= "Select * from users where id=?"
+    const query= "Select * from users where id=? or accountNumber = ? or identityNumber = ? "
 
-    const [resultado] = await pool.query(query,id)
+    const [resultado] = await pool.query(query,[id,id,id])
     return resultado
 }
 

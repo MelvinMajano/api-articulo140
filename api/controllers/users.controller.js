@@ -1,9 +1,10 @@
-import { IDv } from "../schemas/Auth.Schema.js"
+import { IDv, NumbersV } from "../schemas/Auth.Schema.js"
 import { userExist } from "../models/auth.model.js"
 import { CurrentActivitiesDB, VOAEHours, registerActivityForStudentModel } from "../models/users.model.js"
 import { validateActivityForUser } from "../schemas/ActivitiesSchema/activitiesSchema.js"
 import { validateResult, validateUserDb } from "../utils/validations.js"
 import { v4 as uuidv4 } from "uuid";
+import { handleResponse } from "../utils/responseHandler.js"
 
 
 export default class UserController{
@@ -12,10 +13,16 @@ export default class UserController{
         const {id} = req.params
         const data={id}
        try{
-         const filter  = await IDv(data)
+
+       
+         const filter  = await NumbersV(data)
+         
         if(validateResult(filter,res)) return
         
+       
+        
         const Exist = await userExist(id)
+       
 
         if(validateUserDb(Exist,res))return
           
@@ -57,8 +64,10 @@ export default class UserController{
             return res.status(200).json({message:"No ha Adquirido Horas VOAE AUN"})
         }
         
+        
+        
         if(result){
-            return res.status(201).json({message:"Horas VOAE",result})
+            return res.status(200).json({message:"Horas VOAE",result})
         }
         
       } catch (error) {
