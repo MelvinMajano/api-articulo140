@@ -4,7 +4,7 @@ import { CurrentActivitiesDB, VOAEHours, registerActivityForStudentModel } from 
 import { validateActivityForUser } from "../schemas/ActivitiesSchema/activitiesSchema.js"
 import { validateResult, validateUserDb } from "../utils/validations.js"
 import { v4 as uuidv4 } from "uuid";
-import { handleResponse } from "../utils/responseHandler.js"
+import { successResponse,erroResponse } from "../utils/responseHandler.js"
 
 
 export default class UserController{
@@ -29,15 +29,15 @@ export default class UserController{
         const result = await CurrentActivitiesDB(id)
         
         if(result.length===0){
-            return res.status(200).json({message:"No ha realizado actividades previamente"})
+            return successResponse(res,200,"No ha realizado actividades previamente") 
         }
         
         if(result){
-            return res.status(201).json({message:"Actividades",result})
+          return  successResponse(res,201,"Actividades",result)
         }
 
        }catch(error){
-        return res.status(500).json({ message: "Error al visualizar Actividades", error });
+        return erroResponse(res,500,"Error al visualizar Actividades",error)
        }
 
 
@@ -61,17 +61,17 @@ export default class UserController{
         const result  = await VOAEHours(id)
         
         if(result.length===0){
-            return res.status(200).json({message:"No ha Adquirido Horas VOAE AUN"})
+             return successResponse(res,200,"No ha Adquirido Horas VOAE AUN")
         }
         
         
         
         if(result){
-            return res.status(200).json({message:"Horas VOAE",result})
+            return successResponse(res,200,"No ha Adquirido Horas VOAE AUN",result)
         }
         
       } catch (error) {
-        return res.status(500).json({ message: "Error al visualizar Horas VOAE", error })
+        return erroResponse(res,500,"Error al visualizar Horas VOAE",error)
       }
 
 
@@ -89,7 +89,7 @@ export default class UserController{
             const {success,error,data: filteredData} = await validateActivityForUser(data)
 
             if(!success) {
-                return res.status(400).json({message:"Error en los datos",error})
+                return erroResponse(res,400,"Error en los datos",error)
             }
 
             filteredData.id = uuidv4();
@@ -98,10 +98,12 @@ export default class UserController{
 
             const response = await registerActivityForStudentModel(filteredData,id)
 
-            return res.status(201).json({ message: "Actividad registrada con éxito", response })
+            return successResponse(res,201,"Actividad registrada con éxito",response)
+
+            
 
         } catch (error) {
-            return res.status(500).json({ message: "Error al registrar actividad", error}) 
+            return erroResponse(res,500,"Error al registrar actividad",error)
         }
     };
 }

@@ -6,6 +6,7 @@ import {Resend} from "resend"
 import dotenv from 'dotenv'
 import jwt from 'jsonwebtoken' 
 import { validateResult,validateUserDb } from "../utils/validations.js"
+import { erroResponse, successResponse } from "../utils/responseHandler.js"
 
 export default class AuthController {
 
@@ -33,11 +34,12 @@ export default class AuthController {
             
           
             if(resultado){
-                res.status(201).json({message:"Registro con Exito",resultado})
+                return successResponse(res,201,"Registro con Exito",resultado)
+               
             }
         }catch(error){
-                      return   res.status(500).json({message: 'Error al registrar usuario', error});
-
+            return erroResponse(res,500,"Error al registrar Usuario",error)
+                     
             
         }
 
@@ -63,7 +65,8 @@ static LoginUser = async (req, res) => {
         const match = await bcrypt.compare(password, user[0].password);
         
         if (!match) {
-            return res.status(401).json({ message: "Contraseña o Correo incorrecto " });
+            return erroResponse(res,401,"Contraseña o Correo incorrecto ")
+
         }
 
         
@@ -76,14 +79,12 @@ static LoginUser = async (req, res) => {
         const token = jwt.sign(payload, process.env.JWT_SECRET, {
             expiresIn: "12h",
         });
-
-        return res.status(200).json({
-            message: "Inicio de sesión exitoso",
-            token: token,
-        });
+        return successResponse(res,200,"Inicio de sesión exitoso",token)
+        
 
     } catch (error) {
-        return res.status(500).json({ message: "Error en el login", error });
+       return  erroResponse(res,500,"Error en el login",error)
+        
     }
 }
 
@@ -125,30 +126,34 @@ static UpdatePassword = async (req,res)=>{
         console.log(Pass)
 
         if(!Pass || Pass.length===0){
-             return res.status(404).json({ message: "Contraseña no concuerda" });
+            return erroResponse(res,404,"Contraseña no concuerda")
+             
         }
         
         const match = await bcrypt.compare(password, Pass[0].password);
         
         if (!match) {
-            return res.status(401).json({ message: "Contraseña No coincide " });
+            return erroResponse(res,401,"Contraseña No coincide ")
+           
         }
         
 
 
         console.log(hash_password_New,decoded.id)
         const resultado = await ChangePassDb(hash_password_New,decoded.id)
-        console.log("paso")
+        
 
         if(resultado){
-                res.status(201).json({message:"Contraseña Actualizada conn Exito ",resultado})
+            return successResponse(res,201,"Contraseña Actualizada conn Exito ",resultado)
             }
         
 
         
 
 
-    }catch(error){return res.status(500).json({ message: "Error Al cambiar Contraseña", error });}
+    }catch(error){
+        return erroResponse(res,500,"Error Al cambiar Contraseña",error)
+        }
 
 
     
@@ -175,8 +180,7 @@ static UpdateData = async (req,res)=>{
 
             const result = await AdminChangeDb(ID,role)
             
-
-            return res.status(201).json({message:"Actualizacion de Rol Exitosa"})
+            return successResponse(res,201,"Actualizacion de Rol Exitosa")
 
         }
         console.log(Exist)
@@ -188,7 +192,7 @@ static UpdateData = async (req,res)=>{
         const Update = await UpdateDataDB(name,email,degreeId,id)
        
         if(Update){
-                res.status(201).json({message:"Actualizacion de Datos con Exito  ",Update})
+            return successResponse(res,201,"Actualizacion de Datos con Exito  ",Update)
             }
 
 
@@ -196,7 +200,8 @@ static UpdateData = async (req,res)=>{
 
         
     }catch(error){
-        return res.status(500).json({ message: "Error Al Actualizar Datos", error });}
+        return erroResponse(res,500,"Error Al Actualizar Datos",error)
+       }
 }
 
 static DeleteUser=async (req,res)=>{
@@ -216,10 +221,12 @@ static DeleteUser=async (req,res)=>{
     
 
     if(result){
-                res.status(201).json({message:"Actualizacion de Datos con Exito  ",result})
+        return successResponse(res,201,"Actualizacion de Datos con Exito  ",result)
             }
 
-   }catch(error){ return res.status(500).json({ message: "Error Al Eliminar Usuario", error })}
+   }catch(error){
+    return erroResponse(res,500,"Error Al Eliminar Usuario",error)
+   }
 
 
 
