@@ -45,12 +45,12 @@ export default class UserController{
 
     static ActivitiesScope = async (req , res)=>{
 
-      const  {id} = req.params
-      const data = {id}
+       const id = Object.values(req.params)[0];
+        const data=id
 
       try {
 
-        const filter  = await IDv(data)
+        const filter  = await NumbersV(data)
 
         if(validateResult(filter,res)) return
 
