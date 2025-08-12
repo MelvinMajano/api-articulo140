@@ -5,6 +5,7 @@ import bcrypt from "bcrypt"
 import {Resend} from "resend"
 import dotenv from 'dotenv'
 import jwt from 'jsonwebtoken' 
+import { validateResult,validateUserDb } from "../utils/validations.js"
 
 export default class AuthController {
 
@@ -16,15 +17,9 @@ export default class AuthController {
         
         try{
 
-            const filtrado = await FilterData(data)
+            const filter = await FilterData(data)
             
-
-            if (!filtrado.success) {
-                return res.status(400).json({
-                 message: "Error al validar los datos",
-                errors: filtrado.error.format(),  
-             });
-}
+           if(validateResult(filter,res)) return
         const id = uuidv4()
         
         
@@ -55,22 +50,14 @@ static LoginUser = async (req, res) => {
 
     try {
         
-        const Filtrado = await LoginData(data);
-        console.log("hola")
-        if (!Filtrado.success) {
-            return res.status(400).json({
-                message: "Error al validar los datos",
-                errors: Filtrado.error.format(),
-            });
-        }
+        const filter = await LoginData(data);
+        if(validateResult(filter,res)) return
 
         
-        const user = await GetUserByEmailDB(email); // esta función debe traer el usuario desde la BD
+        const user = await GetUserByEmailDB(email); 
         
-        console.log(user)
-        if (!user ||user.length ===0) {
-            return res.status(404).json({ message: "Usuario no encontrado o Contraseña incorrecta" });
-        }
+        
+        if(validateUserDb(user,res)) return
 
         
         const match = await bcrypt.compare(password, user[0].password);
@@ -118,18 +105,10 @@ static UpdatePassword = async (req,res)=>{
 
 
         const exist = await userExist(id)
-        const filtrado = await UpdateP(data)
+        const filter = await UpdateP(data)
 
-        if(!exist || exist.length===0){
-             return res.status(404).json({ message: "usuario no existe" });
-        }
-        
-        if (!filtrado.success) {
-            return res.status(400).json({
-                message: "Error al validar los datos",
-                errors: filtrado.error.format(),
-            });
-        }
+        if(validateUserDb(exist,res)) return        
+        if(validateResult(filter,res)) return
 
         const token = authorization.split(' ')[1]
        
@@ -184,25 +163,13 @@ static UpdateData = async (req,res)=>{
     try{
 
         const filter = await UpdateD(data)
-        if (!filter.success) {
-            return res.status(400).json({
-                message: "Error al validar los datos",
-                errors: filter.error.format(),
-            });
-        }
+         if(validateResult(filter,res)) return
 
         const token  = authorization.split(' ')[1]
         const decoded = jwt.verify(token,process.env.JWT_SECRET)
         const Exist = await userExist(id)
         
-
-        
-
-        
-
-        if(!Exist || Exist.length===0){
-            return res.status(404).json({ message: "usuario no existe" });
-        }
+        if(validateUserDb(Exist,res)) return
 
         if(decoded.role ==="admin" && name !==undefined){
 
@@ -239,18 +206,11 @@ static DeleteUser=async (req,res)=>{
    try{
      const filter  = await IDv(data)
 
-    if (!filter.success) {
-            return res.status(400).json({
-                message: "Error con el ID",
-                errors: filter.error.format(),
-            });
-        }
+     if(validateResult(filter,res)) return
     
     const Exist = await userExist(id)
         
-        if(!Exist || Exist.length===0){
-            return res.status(404).json({ message: "usuario no existe" });
-        }    
+    if(validateUserDb(user,res)) return
         
     const result = await DeleteUserDB(id)   
     

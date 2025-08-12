@@ -2,6 +2,8 @@ import { IDv } from "../schemas/Auth.Schema.js"
 import { userExist } from "../models/auth.model.js"
 import { CurrentActivitiesDB, VOAEHours } from "../models/users.model.js"
 import { id } from "zod/locales"
+import { validateResult, validateUserDb } from "../utils/validations.js"
+
 
 export default class UserController{
 
@@ -10,21 +12,12 @@ export default class UserController{
         const data={id}
        try{
          const filter  = await IDv(data)
-
-        if (!filter.success) {
-            return res.status(400).json({
-                message: "Error con el ID",
-                errors: filter.error.format(),
-            });
-        }
-
-        const Exist = await userExist(id)
-                
-                if(!Exist || Exist.length===0){
-                    return res.status(404).json({ message: "usuario no existe" });
-                }    
+        if(validateResult(filter,res)) return
         
-                
+        const Exist = await userExist(id)
+
+        if(validateUserDb(Exist,res))return
+          
         const result = await CurrentActivitiesDB(id)
         
         if(result.length===0){
@@ -51,19 +44,12 @@ export default class UserController{
 
         const filter  = await IDv(data)
 
-        if (!filter.success) {
-            return res.status(400).json({
-                message: "Error con el ID",
-                errors: filter.error.format(),
-            });
-        }
+        if(validateResult(filter,res)) return
 
         const Exist = await userExist(id)
+        if(validateUserDb(Exist,res))return
                 
-                if(!Exist || Exist.length===0){
-                    return res.status(404).json({ message: "usuario no existe" });
-                }    
-
+                
         const result  = await VOAEHours(id)
         
         if(result.length===0){
