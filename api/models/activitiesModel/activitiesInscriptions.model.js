@@ -56,35 +56,6 @@ export const registerStudentModel = async (studentID, activityID) => {
     }
 }
 
-export const unsubscribeStudentModel = async (studentID, activityID) => {
-
-    const cnn = await pool.getConnection();
-    await cnn.beginTransaction();
-
-    const query = `delete from registrations where studentId = ? and activityId = ?`
-    const queryUpdate = `update activities set availableSpots = availableSpots + 1 where id = ?`
-
-    try {
-
-        const [deleteResult] = await cnn.execute(query, [studentID, activityID]);
-
-        if (deleteResult.affectedRows === 0) {
-            await cnn.rollback();
-            return {success:false,message: 'No se pudo desuscribir al estudiante de la actividad.' };
-        }
-
-        await cnn.execute(queryUpdate, [activityID]);
-        cnn.commit();
-
-        return {success:true,message: 'Estudiante desuscrito de la actividad con éxito.' };
-
-    } catch (error) {
-        cnn.rollback();
-        throw error;
-    } finally {
-        cnn.release();
-    }
-}
 
 export const closeInscriptionsModel = async (activityID) => {
 

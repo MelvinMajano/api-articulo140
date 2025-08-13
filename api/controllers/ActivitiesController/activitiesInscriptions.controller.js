@@ -1,4 +1,4 @@
-import { studentExists, activityExists, registerStudentModel, unsubscribeStudentModel, closeInscriptionsModel } from "../../models/activitiesModel/activitiesInscriptions.model.js";
+import { studentExists, activityExists, registerStudentModel, closeInscriptionsModel } from "../../models/activitiesModel/activitiesInscriptions.model.js";
 import { calculateAllStudentsVOAE } from "../../utils/activities/horasVOAECalculator.js";
 
 export class ActivitiesInscriptionsController {
@@ -29,36 +29,6 @@ export class ActivitiesInscriptionsController {
 
        } catch (error) {
            res.status(500).json({message:'Hubo un problema al registrar al estudiante', error})
-       }
-    }
-
-    static unsubscribeStudentinActivity = async (req,res) => {
-
-        const {activityid, id} = req.params;
-
-        try{
-
-           const student = await studentExists(id);
-           const activity = await activityExists(activityid);
-
-           if (student.length === 0) {
-               return res.status(404).json({ message: "Estudiante no encontrado" });
-           }
-
-           if (activity.length === 0) {
-               return res.status(404).json({ message: "Actividad no encontrada" });
-           }
-
-           const response = await unsubscribeStudentModel(id, activityid);
-
-           if (response.success === false) {
-               return res.status(400).json(response.message);
-           }
-
-           res.status(200).json({ message: response.message });
-
-       } catch (error) {
-           res.status(500).json({message:'Hubo un problema al desuscribir al estudiante', error})
        }
     }
 

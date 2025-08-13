@@ -26,7 +26,6 @@ activitiesRouter.get('/:activityid/attendance', ActivitiesAttendanceController.v
 
 //Logica de inscripciones
 activitiesRouter.post('/:activityid/register/:id', ActivitiesInscriptionsController.registeStudentinActivity)
-activitiesRouter.delete('/:activityid/unsubscribe/:id', ActivitiesInscriptionsController.unsubscribeStudentinActivity);
 activitiesRouter.put('/register/end/:id', ActivitiesInscriptionsController.closeInscriptions)
 activitiesRouter.put('/finish/:id', ActivitiesInscriptionsController.closeActivity);
 
