@@ -2,6 +2,7 @@ import { validateAttendances } from "../../schemas/ActivitiesSchema/activitiesAt
 import { v4 as uuidv4 } from "uuid";
 import { registerAttendanceModel, getAttendanceModel} from "../../models/activitiesModel/activitiesAttendance.model.js";
 import { formatDateHonduras } from "../../utils/activities/formatDateHonduras.js";
+import { successResponse, erroResponse } from "../../utils/responseHandler.js";
 
 export class ActivitiesAttendanceController {
 
@@ -11,7 +12,7 @@ export class ActivitiesAttendanceController {
         const parsed = await validateAttendances(data);
 
         if(!parsed.success){
-            return res.status(400).json({message:'Hubo un error al validar la data', error: parsed.error.format()});
+            return erroResponse(res, 400, 'Hubo un error al validar la data', parsed.error.format());
         }
 
         const safeData = parsed.data.attendances.map(attendance => ({
@@ -20,12 +21,13 @@ export class ActivitiesAttendanceController {
         }));
 
         try {
-            const response = await registerAttendanceModel(safeData);
+            
+            await registerAttendanceModel(safeData);
 
-            res.json({message:'Asistencias registradas con éxito'});
+            return successResponse(res, 200, 'Asistencias registradas con éxito');
 
         } catch (error) {
-            res.status(500).json({message:'Hubo un problema al crear la asistencia', error});
+            return erroResponse(res, 500, 'Hubo un problema al crear la asistencia', error);
         }
     }
 
@@ -38,20 +40,19 @@ export class ActivitiesAttendanceController {
             const response = await getAttendanceModel(activityid);
 
             if (response.length === 0) {
-                return res.status(404).json({message: 'No se encontraron registros de asistencia para esta actividad'});
+                return erroResponse(res, 404, 'No se encontraron registros de asistencia para esta actividad');
             }
 
             const formattedsAttendances = response.map(attendance => ({
                 ...attendance,
                 entryTime: formatDateHonduras(attendance.entryTime),
                 exitTime: formatDateHonduras(attendance.exitTime),
-                
             }));
-            
-            res.json(formattedsAttendances);
+
+            return successResponse(res, 200, formattedsAttendances);
 
         } catch (error) {
-            res.status(500).json({message:'Hubo un problema al obtener la asistencia', error});
+            return erroResponse(res, 500, 'Hubo un problema al obtener la asistencia', error);
         }
     }
 }

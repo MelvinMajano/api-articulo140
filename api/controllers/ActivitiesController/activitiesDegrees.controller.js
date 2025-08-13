@@ -1,5 +1,6 @@
 import { validateDegree } from "../../schemas/ActivitiesSchema/activitiesDegreesSchema.js";
 import { createDegreeModel, getDegreesModel, updateDegreeModel, deleteDegreeModel, degreeExistsModel, hasConflictDegreeModel } from "../../models/activitiesModel/activitiesDegrees.model.js";
+import { successResponse, erroResponse } from "../../utils/responseHandler.js";
 
 export class ActivitiesDegreesController {
 
@@ -10,26 +11,23 @@ export class ActivitiesDegreesController {
         const { success, error } = await validateDegree(degree);
 
         if (!success) {
-            return res.status(400).json({ 
-                message: "Error al validar los datos",
-                errors: error.format(),   
-            });
+            return erroResponse(res, 400, "Error al validar los datos", error.format());
         }
 
         try {
             await createDegreeModel(degree);
-            res.status(201).json({ message: "Carrera creada con éxito" });
+            return successResponse(res, 201, "Carrera creada con éxito");
         } catch (error) {
-            res.status(500).json({ message: "Hubo un problema al crear la carrera", error });
+            return erroResponse(res, 500, "Hubo un problema al crear la carrera", error);
         }
     }
 
     static getDegrees = async (req, res) => {
         try {
             const degrees = await getDegreesModel();
-            res.json(degrees);
+            return successResponse(res, 200, degrees);
         } catch (error) {
-            res.status(500).json({ message: "Hubo un problema al obtener las carreras", error });
+            return erroResponse(res, 500, "Hubo un problema al obtener las carreras", error);
         }
     }
 
@@ -40,23 +38,20 @@ export class ActivitiesDegreesController {
         const { success, error } = await validateDegree(degree);
 
         if (!success) {
-            return res.status(400).json({ 
-                message: "Error al validar los datos",
-                errors: error.format(),   
-            });
+            return erroResponse(res, 400, "Error al validar los datos", error.format());
         }
 
         const degreeExist = await degreeExistsModel(id);
 
         if (degreeExist.length === 0) {
-            return res.status(404).json({ message: "Carrera no encontrada" });
+            return erroResponse(res, 404, "Carrera no encontrada");
         }
 
         try {
             await updateDegreeModel(degree, id);
-            res.json({ message: "Carrera actualizada con éxito" });
+            return successResponse(res, 200, "Carrera actualizada con éxito");
         } catch (error) {
-            res.status(500).json({ message: "Hubo un problema al actualizar la carrera", error });
+            return erroResponse(res, 500, "Hubo un problema al actualizar la carrera", error);
         }
     }
 
@@ -67,18 +62,18 @@ export class ActivitiesDegreesController {
         const hasConflict = await hasConflictDegreeModel(id);
 
         if (degreeExist.length === 0) {
-            return res.status(404).json({ message: "Carrera no encontrada" });
+            return erroResponse(res, 404, "Carrera no encontrada");
         }
 
         if (hasConflict.length > 0) {
-            return res.status(409).json({ message: "La carrera no se puede eliminar porque está vinculada a una actividad" });
+            return erroResponse(res, 409, "La carrera no se puede eliminar porque está vinculada a una actividad");
         }
 
         try {
             await deleteDegreeModel(id);
-            res.json({ message: "Carrera eliminada con éxito" });
+            return successResponse(res, 200, "Carrera eliminada con éxito");
         } catch (error) {
-            res.status(409).json({ message: "Hubo un problema al eliminar la carrera", error: error.message });
+            return erroResponse(res, 500, "Hubo un problema al eliminar la carrera", error);
         }
     }
 }

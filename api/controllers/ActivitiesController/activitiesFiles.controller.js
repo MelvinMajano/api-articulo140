@@ -1,15 +1,16 @@
 import { getActivitiesFilesModel, postActivitiesFilesModel } from "../../models/activitiesModel/activitiesFile.model.js";
 import { validateFile } from "../../schemas/ActivitiesSchema/activitiesFileShema.js";
 import { v4 as uuidv4 } from "uuid";
+import { successResponse, erroResponse } from "../../utils/responseHandler.js";
 
 export class ActivitiesFilesController {
     static getActivitiesFilesController =async(req,res)=>{
         const {id} = req.params;
         try {
             const response = await getActivitiesFilesModel(id)
-            res.json(response);
+            return successResponse(res,200,response)
         } catch (error) {
-            res.status(500).json({message:`hubo un error al obtener el archivo`,error})
+            return erroResponse(res,500,'hubo un error al obtener el archivo',error)
         }
     }
 
@@ -20,7 +21,7 @@ export class ActivitiesFilesController {
         const {success,error,data:safedata} = await validateFile(data);
                 
         if(!success){
-            return res.status(404).json({message:'hubo un error al validar la data',error});
+            return erroResponse(res,404,'hubo un error al validar la data',error);
         };
 
         //TODO:Implementar el metodo para subir el archivo a la nube y obtener la url
@@ -30,9 +31,9 @@ export class ActivitiesFilesController {
         safedata.url=url;
         try {
             await postActivitiesFilesModel(safedata);
-            res.json({message:'Se añadio el archivo con exito'})
+            return successResponse(res, 200, 'Se añadio el archivo con exito');
         } catch (error) {
-            res.status(500).json({message:'hubo un error al añadir el archivo',error})
+            return erroResponse(res, 500, 'hubo un error al añadir el archivo', error);
         }
     }
 }

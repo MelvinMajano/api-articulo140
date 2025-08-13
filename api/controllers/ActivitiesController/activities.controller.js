@@ -1,6 +1,8 @@
 import { getActividadbyIdModel, getActividadModel, ValidateCreateActivitiesModel, ValitateUpdateActivitiesModel, ValidateDeleteActivitiesModel } from "../../models/activitiesModel/activities.model.js";
 import { validateActividad, validateActividadput } from "../../schemas/ActivitiesSchema/activitiesSchema.js";
 import { v4 as uuidv4 } from "uuid";
+import { successResponse, erroResponse } from "../../utils/responseHandler.js";
+import {formatDateHonduras} from "../../utils/activities/formatDateHonduras.js";
 
 export class ActivitiesController {
     static getActivityController =async(req,res)=>{
@@ -9,13 +11,19 @@ export class ActivitiesController {
             const actividades = await getActividadModel();
 
             if (actividades.length === 0) {
-                return res.status(404).json({message: 'No se encontraron actividades'});
+                return erroResponse(res, 404, 'No se encontraron actividades');
             }
 
-            res.json(actividades);
+            const formatedActivities = actividades.map(actividad => ({
+                ...actividad,
+                startDate: formatDateHonduras(actividad.startDate),
+                endDate: formatDateHonduras(actividad.endDate),
+            }));
+
+            return successResponse(res, 200, formatedActivities);
 
         } catch (error) {
-            res.status(500).json({message: 'Error al obtener las actividades', error});
+            return erroResponse(res, 500, 'Error al obtener las actividades', error);
         }
     }
 
@@ -26,12 +34,18 @@ export class ActivitiesController {
             const actividad =  await getActividadbyIdModel(id);
 
             if (actividad.length === 0) {
-                return res.status(404).json({message: 'Actividad no encontrada'});
+                return erroResponse(res, 404, 'Actividad no encontrada');
             }
 
-            res.status(200).json(actividad);
+            const formatedActivity = actividad.map(act => ({
+                ...act,
+                startDate: formatDateHonduras(act.startDate),
+                endDate: formatDateHonduras(act.endDate),
+            }));
+
+            return successResponse(res, 200, formatedActivity);
         } catch (error) {
-            res.status(500).json({message:'Hubo un problema al obtener la actividad '},error)
+            return erroResponse(res, 500, 'Hubo un problema al obtener la actividad', error);
         }
     }
 
@@ -41,7 +55,7 @@ export class ActivitiesController {
         const {success,error,data} =await validateActividad(activityReceived);
 
         if(!success){
-            return res.status(404).json({message:`Error al validar la data: ${error}`})
+            return erroResponse(res, 400, 'Error al validar la data', error);
         }
 
         data.id = uuidv4()
@@ -51,12 +65,12 @@ export class ActivitiesController {
             const response = await ValidateCreateActivitiesModel.validateActivitiesModel(data);
             console.log(response);
             if(response){
-                return res.status(404).json({message:`No se puede crear una actividad en este dia ya que ya existe otra actividad en el mismo horario`});
+                return erroResponse(res, 404, 'No se puede crear una actividad en este dia ya que ya existe otra actividad en el mismo horario');
             }
             await ValidateCreateActivitiesModel.crearActividadModel(data);
-            res.status(201).json({message:`Actividad creada con exito`});
+            return successResponse(res, 201, 'Actividad creada con exito');
         } catch (error) {
-            res.status(400).json({message:`hubo un error al crear la data`,error})
+            return erroResponse(res, 400, 'hubo un error al crear la data', error);
         }
     }
 
@@ -67,20 +81,20 @@ export class ActivitiesController {
         const {success,error,data:safedata}=await validateActividadput(data);
 
         if(!success){
-            return res.status(400).json({message:`Hubo un error al validar la data`,error}) 
+            return erroResponse(res, 400, 'Error al validar la data', error);
         }
 
         try {
             const result = await ValitateUpdateActivitiesModel.validateActivitiesDelete(id);
 
                 if(result==='true'){
-                    return res.status(400).json({message:`No se puede actualizar una actividad eliminada`});
+                    return erroResponse(res, 400, 'No se puede actualizar una actividad eliminada');
                 }
 
             const response = await ValitateUpdateActivitiesModel.putActividadbyidModel(safedata);
-            res.json({message:`La actividad ha sido actualizada con exito`,response})
+            return successResponse(res, 200, 'La actividad ha sido actualizada con exito', response);   
         } catch (error) {
-            res.status(500).json({message:`Hubo un problema al actualizar la actividad`, error})
+            return erroResponse(res, 500, 'Hubo un problema al actualizar la actividad', error);
         }
     }   
 
@@ -90,28 +104,27 @@ export class ActivitiesController {
             const {inscripcion,status,isDeleted} = await ValidateDeleteActivitiesModel.validateActivitiesModel(id);
 
             if(inscripcion){
-                return res.status(400).json({message:`La actividad no se puede eliminar por que tiene estudiantes inscritos`})
+                return erroResponse(res, 400, 'La actividad no se puede eliminar por que tiene estudiantes inscritos');
             }
 
-            
-          if(isDeleted==='true'){
-                return res.status(400).json({message:`La actividad ya esta eliminada`})
+            if(isDeleted==='true'){
+                return erroResponse(res, 400, 'La actividad ya esta eliminada');
             }
             
             if(!status){
-                return res.status(400).json({message:`Actividad no encontrada`})
+                return erroResponse(res, 400, 'Actividad no encontrada');
             }
 
             if(status==='inProgress'){
-                return res.json({message:`Actividad en proceso no puede ser eliminada `});
+                return erroResponse(res, 400, 'Actividad en proceso no puede ser eliminada');
             }else if(status==='finished'){
-                return res.json({message:`Actividad finalizada no puede ser eliminada`});
+                return erroResponse(res, 400, 'Actividad finalizada no puede ser eliminada');
             }
             
             await ValidateDeleteActivitiesModel.deleteActivitiesModel(id);
-            return res.json({message:`Actividad eliminada exitosamente`});
+            return successResponse(res, 200, 'Actividad eliminada exitosamente');
         } catch (error) {
-            res.status(500).json({message:`Hubo un problema al eliminar la actividad`,error})
+            return erroResponse(res, 500, 'Hubo un problema al eliminar la actividad', error);
         }
     }
 

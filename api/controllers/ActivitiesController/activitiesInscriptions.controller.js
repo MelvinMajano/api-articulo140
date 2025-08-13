@@ -1,6 +1,6 @@
 import { studentExists, activityExists, registerStudentModel, closeInscriptionsModel } from "../../models/activitiesModel/activitiesInscriptions.model.js";
 import { calculateAllStudentsVOAE } from "../../utils/activities/horasVOAECalculator.js";
-
+import { successResponse,erroResponse} from '../../utils/responseHandler.js';
 export class ActivitiesInscriptionsController {
     static registeStudentinActivity = async (req, res) => {
     
@@ -12,23 +12,23 @@ export class ActivitiesInscriptionsController {
            const activity = await activityExists(activityid);
 
            if (student.length === 0) {
-               return res.status(404).json({ message: "Estudiante no encontrado" });
+               return erroResponse(res, 404, "Estudiante no encontrado");
            }
 
            if (activity.length === 0) {
-               return res.status(404).json({ message: "Actividad no encontrada" });
+               return erroResponse(res, 404, "Actividad no encontrada");
            }
 
            const response = await registerStudentModel(id,activityid)
 
            if (response.success === false) {
-               return res.status(400).json(response);
+               return erroResponse(res, 400, response.message);
            }
 
-           res.status(200).json({ message: response.message });
+           successResponse(res, 200, response.message);
 
        } catch (error) {
-           res.status(500).json({message:'Hubo un problema al registrar al estudiante', error})
+           erroResponse(res, 500, 'Hubo un problema al registrar al estudiante', error);
        }
     }
 
@@ -40,15 +40,15 @@ export class ActivitiesInscriptionsController {
             const activity = await activityExists(id);
 
             if (activity.length === 0) {
-                return res.status(404).json({ message: "Actividad no encontrada" });
+                return erroResponse(res,404,'Actividad no encontrada')
             }
 
             await closeInscriptionsModel(id);
 
-            return res.json({ message: "Las inscripciones han sido cerradas con éxito" });
+            return successResponse(res,200,'Inscripciones cerradas con éxito')
 
         } catch (error) {
-            res.status(500).json({message:'Hubo un problema al cerrar las inscripciones', error})
+            return erroResponse(res,500, 'Hubo un problema al cerrar las inscripciones')
         }
     }
 
@@ -61,17 +61,17 @@ export class ActivitiesInscriptionsController {
             const activity = await activityExists(id);
 
             if (activity.length === 0) {
-                return res.status(404).json({ message: "Actividad no encontrada" });
+               return erroResponse(res, 404, "Actividad no encontrada");
             }
 
             
             await calculateAllStudentsVOAE(id);
 
-            res.json({ message: 'La actividad ha sido cerrada con éxito' });
+            successResponse(res, 200, 'La actividad ha sido cerrada con éxito');
 
         }
         catch (error) {
-            res.status(500).json({message:'Hubo un problema al cerrar la actividad', error}) 
+            erroResponse(res, 500, 'Hubo un problema al cerrar la actividad', error);
         }
 
     }
