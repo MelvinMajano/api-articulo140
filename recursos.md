@@ -24,6 +24,7 @@
 
 - GET    `/api/activities`                         → Ver todas las actividades  
 - GET    `/api/activities/:id`                     → Ver actividad específica  
+- GET    `/api/activities/supervisor/:id`          → Ver las actividades específicas de un supervisor
 - POST   `/api/activities`                         → Crear nueva actividad  
 - PUT    `/api/activities/:id`                     → Actualizar actividad  
 - DELETE `/api/activities/:id`                     → Eliminar (lógicamente) actividad  

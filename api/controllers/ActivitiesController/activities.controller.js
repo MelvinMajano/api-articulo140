@@ -1,4 +1,4 @@
-import { getActividadbyIdModel, getActividadModel, ValidateCreateActivitiesModel, ValitateUpdateActivitiesModel, ValidateDeleteActivitiesModel } from "../../models/activitiesModel/activities.model.js";
+import { getActividadbyIdModel, getActividadModel,getActivitiesForSupervisorModel, confirmSupervisor, ValidateCreateActivitiesModel, ValitateUpdateActivitiesModel, ValidateDeleteActivitiesModel } from "../../models/activitiesModel/activities.model.js";
 import { validateActividad, validateActividadput } from "../../schemas/ActivitiesSchema/activitiesSchema.js";
 import { v4 as uuidv4 } from "uuid";
 import { successResponse, erroResponse } from "../../utils/responseHandler.js";
@@ -46,6 +46,36 @@ export class ActivitiesController {
             return successResponse(res, 200, formatedActivity);
         } catch (error) {
             return erroResponse(res, 500, 'Hubo un problema al obtener la actividad', error);
+        }
+    }
+
+    static getActivitiesForSupervisorId = async (req,res) => {
+
+        const {id} = req.params;
+
+        try {
+
+            const isValidSupervisor = await confirmSupervisor(id);
+
+            if (!isValidSupervisor) {
+                return erroResponse(res, 403, 'El usuario no es un supervisor o no existe');
+            }
+
+            const activities = await getActivitiesForSupervisorModel(id)
+
+            if (activities.length === 0) {
+                return erroResponse(res, 404, 'No se encontraron actividades para este supervisor');
+            }
+
+            const formatedActivities = activities.map(actividad => ({
+                ...actividad,
+                startDate: formatDateHonduras(actividad.startDate),
+                endDate: formatDateHonduras(actividad.endDate),
+            }));
+
+            return successResponse(res, 200, "Actividades: ", formatedActivities);
+        } catch (error) {
+            return erroResponse(res, 500, 'Hubo un problema al obtener las actividades del supervisor', error);
         }
     }
 

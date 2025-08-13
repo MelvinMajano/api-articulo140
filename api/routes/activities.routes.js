@@ -20,6 +20,7 @@ activitiesRouter.delete('/degrees/:id', verifyToken, isAdmin, ActivitiesDegreesC
 //Actividades
 activitiesRouter.get('/',verifyToken,ActivitiesController.getActivityController);
 activitiesRouter.get('/:id',verifyToken,ActivitiesController.getActivityByIdController);
+activitiesRouter.get('/supervisor/:id',verifyToken,isSupervisor,ActivitiesController.getActivitiesForSupervisorId);
 activitiesRouter.post('/',verifyToken,isAdmin,ActivitiesController.createActivityController);
 activitiesRouter.put('/:id',verifyToken,isAdmin,ActivitiesController.putActivityByIdController);
 activitiesRouter.delete('/:id',verifyToken,isAdmin,ActivitiesController.deleteActivityByIdController);

@@ -27,6 +27,24 @@ export const getActividadbyIdModel =async(id)=>{
     return rows;
 }
 
+export const confirmSupervisor = async (id) => {
+    const query = `select * from users where id = ? and role = 'supervisor'`;
+    const [rows] = await pool.query(query, [id]);
+    return rows;
+}
+
+export const getActivitiesForSupervisorModel = async (id) => {
+
+    const query = `select a.title, a.description, d.name, d.faculty , a.startDate, a.endDate, a.availableSpots 
+                    from activities as a 
+                    inner join users as u on a.supervisorId = u.id
+                    inner join degrees as d on d.id = a.degreeId
+                    where u.id = ? and a.status = 'pending'`;
+
+    const [rows] = await pool.query(query, [id]);
+    return rows;
+}
+
 export class ValidateCreateActivitiesModel {
     static validateActivitiesModel = async(data)=>{
         const {startDate,endDate} = data;
