@@ -10,8 +10,6 @@ import { erroResponse, successResponse } from "../utils/responseHandler.js"
 
 export default class AuthController {
 
-
-
     static  RegisterUser = async (req,res)=>{
         const {name,email,password,accountNumber,identityNumber,role,degreeId} = req.body
         const data={name,email,password,accountNumber,identityNumber,role,degreeId}
@@ -25,20 +23,14 @@ export default class AuthController {
         
         
         const hash_password = await bcrypt.hash(password, 10)
-        
-            
-            
-           
+                   
             const resultado = await RegisterUserBD([id,name,email,hash_password,accountNumber,identityNumber,role,degreeId])
             
-            
-          
             if(resultado){
-                return successResponse(res,201,"Registro con Exito",resultado)
-               
+                return successResponse(res,201,"Registro con éxito",resultado)
             }
         }catch(error){
-            return erroResponse(res,500,"Error al registrar Usuario",error)
+            return erroResponse(res,500,"Error al registrar usuario",error)
                      
             
         }
@@ -65,7 +57,7 @@ static LoginUser = async (req, res) => {
         const match = await bcrypt.compare(password, user[0].password);
         
         if (!match) {
-            return erroResponse(res,401,"Contraseña o Correo incorrecto ")
+            return erroResponse(res,401,"Contraseña o correo incorrecto ")
 
         }
 
@@ -96,12 +88,6 @@ static UpdatePassword = async (req,res)=>{
     const {id} = req.params
     const data={password,NewPassword}
 
-    
-
-    
-
-    
-
     try{
 
 
@@ -115,12 +101,8 @@ static UpdatePassword = async (req,res)=>{
        
         const decoded = jwt.verify(token,process.env.JWT_SECRET)
         
-
-        
-        
         const hash_password_New = await bcrypt.hash(NewPassword,10)
-        
-        
+            
         const Pass = await VerifyPasswordDB(decoded.email,decoded.id)
 
         console.log(Pass)
@@ -133,30 +115,20 @@ static UpdatePassword = async (req,res)=>{
         const match = await bcrypt.compare(password, Pass[0].password);
         
         if (!match) {
-            return erroResponse(res,401,"Contraseña No coincide ")
+            return erroResponse(res,401,"Contraseña no coincide ")
            
         }
         
-
-
         console.log(hash_password_New,decoded.id)
         const resultado = await ChangePassDb(hash_password_New,decoded.id)
         
-
         if(resultado){
-            return successResponse(res,201,"Contraseña Actualizada conn Exito ",resultado)
+            return successResponse(res,201,"Contraseña Actualizada con éxito ",resultado)
             }
-        
-
-        
-
 
     }catch(error){
-        return erroResponse(res,500,"Error Al cambiar Contraseña",error)
-        }
-
-
-    
+        return erroResponse(res,500,"Error al cambiar contraseña",error)
+        }   
 }
 
 static UpdateData = async (req,res)=>{
@@ -195,10 +167,6 @@ static UpdateData = async (req,res)=>{
             return successResponse(res,201,"Actualizacion de Datos con Exito  ",Update)
             }
 
-
-        
-
-        
     }catch(error){
         return erroResponse(res,500,"Error Al Actualizar Datos",error)
        }
@@ -227,12 +195,6 @@ static DeleteUser=async (req,res)=>{
    }catch(error){
     return erroResponse(res,500,"Error Al Eliminar Usuario",error)
    }
-
-
-
-
 }
-
-
 
 }

@@ -3,7 +3,7 @@ import { validateActividad, validateActividadput } from "../../schemas/Activitie
 import { v4 as uuidv4 } from "uuid";
 
 export class ActivitiesController {
-    static getActividadController =async(req,res)=>{
+    static getActivityController =async(req,res)=>{
         
          try {
             const actividades = await getActividadModel();
@@ -19,7 +19,7 @@ export class ActivitiesController {
         }
     }
 
-    static getActividadbyIdController = async(req,res)=>{
+    static getActivityByIdController = async(req,res)=>{
 
         const {id} = req.params;
         try {
@@ -35,10 +35,10 @@ export class ActivitiesController {
         }
     }
 
-    static crearActividadController =async(req,res)=>{
+    static createActivityController =async(req,res)=>{
 
-        const actividadResivida = req.body;
-        const {success,error,data} =await validateActividad(actividadResivida);
+        const activityReceived = req.body;
+        const {success,error,data} =await validateActividad(activityReceived);
 
         if(!success){
             return res.status(404).json({message:`Error al validar la data: ${error}`})
@@ -60,7 +60,7 @@ export class ActivitiesController {
         }
     }
 
-    static putActividadbyidController = async(req,res)=>{
+    static putActivityByIdController = async(req,res)=>{
         const {id} = req.params;
         const data = req.body;
         data.actividadId=id;
@@ -84,7 +84,7 @@ export class ActivitiesController {
         }
     }   
 
-    static deleteActividadByidController =async(req,res)=>{
+    static deleteActivityByIdController =async(req,res)=>{
         const {id}= req.params;
         try {
             const {inscripcion,status,isDeleted} = await ValidateDeleteActivitiesModel.validateActivitiesModel(id);

@@ -16,7 +16,6 @@ export default class UserController{
 
        
          const filter  = await NumbersV(data)
-         console.log(filter)
         if(validateResult(filter,res)) return
         
        
@@ -37,7 +36,7 @@ export default class UserController{
         }
 
        }catch(error){
-        return erroResponse(res,500,"Error al visualizar Actividades",error)
+        return erroResponse(res,500,"Error al visualizar actividades",error)
        }
 
 
@@ -61,13 +60,13 @@ export default class UserController{
         const result  = await VOAEHours(id)
         
         if(result.length===0){
-             return successResponse(res,200,"No ha Adquirido Horas VOAE AUN")
+             return successResponse(res,200,"No ha Adquirido Horas VOAE")
         }
         
         
         
         if(result){
-            return successResponse(res,200,"No ha Adquirido Horas VOAE AUN",result)
+            return successResponse(res,200,"Horas VOAE Adquiridas:",result)
         }
         
       } catch (error) {

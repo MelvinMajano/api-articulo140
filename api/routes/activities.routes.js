@@ -14,11 +14,11 @@ activitiesRouter.put('/degrees/:id', ActivitiesDegreesController.updateDegree);
 activitiesRouter.delete('/degrees/:id', ActivitiesDegreesController.deleteDegree);
 
 //Actividades
-activitiesRouter.get('/',ActivitiesController.getActividadController);
-activitiesRouter.get('/:id',ActivitiesController.getActividadbyIdController);
-activitiesRouter.post('/',ActivitiesController.crearActividadController);
-activitiesRouter.put('/:id',ActivitiesController.putActividadbyidController);
-activitiesRouter.delete('/:id',ActivitiesController.deleteActividadByidController);
+activitiesRouter.get('/',ActivitiesController.getActivityController);
+activitiesRouter.get('/:id',ActivitiesController.getActivityByIdController);
+activitiesRouter.post('/',ActivitiesController.createActivityController);
+activitiesRouter.put('/:id',ActivitiesController.putActivityByIdController);
+activitiesRouter.delete('/:id',ActivitiesController.deleteActivityByIdController);
 
 //logica de asistencia
 activitiesRouter.post('/attendance',ActivitiesAttendanceController.createAttendance);
