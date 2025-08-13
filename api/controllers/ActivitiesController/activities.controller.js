@@ -57,7 +57,7 @@ export class ActivitiesController {
 
             const isValidSupervisor = await confirmSupervisor(id);
 
-            if (!isValidSupervisor) {
+            if (isValidSupervisor.length === 0) {
                 return erroResponse(res, 403, 'El usuario no es un supervisor o no existe');
             }
 
