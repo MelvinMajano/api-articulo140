@@ -20,6 +20,8 @@
     "jsonwebtoken": "9.0.2",
     "mysql2": "3.14.2",
     "resend": "4.8.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "timezone": "1.0.23",
     "utc": "0.1.0",
     "uuid": "11.1.0",

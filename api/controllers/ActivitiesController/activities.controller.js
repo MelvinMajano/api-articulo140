@@ -6,7 +6,6 @@ import {formatDateHonduras} from "../../utils/activities/formatDateHonduras.js";
 
 export class ActivitiesController {
     static getActivityController =async(req,res)=>{
-        
          try {
             const actividades = await getActividadModel();
 
