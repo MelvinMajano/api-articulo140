@@ -58,6 +58,25 @@ UserRouter.get(":id/activities",verifyToken,isAdmin,UserController.GetUserActivi
  */
 UserRouter.get(":id/fields",verifyToken,isAdmin,UserController.ActivitiesScope)
 
+
+/** * @swagger
+ * /api/users/students:
+ *   get:
+ *     summary: Obtener lista de estudiantes
+ *     security:
+ *       - bearerAuth: []
+ *     tags:
+ *       - Users
+ *     responses:
+ *       200:
+ *         description: Lista de estudiantes
+ *       401:
+ *         description: No autorizado
+ *       404:
+ *         description: No se encontraron estudiantes
+ */
+UserRouter.get("/students",verifyToken,isAdmin, UserController.getStudents)
+
 /**
  * @swagger
  * /api/users/{id}/registerActivity:

@@ -49,6 +49,20 @@ ORDER BY u.name;
    return result;
 };
 
+
+export const getStudentsModel = async () => {
+
+    const cnn = await pool.getConnection()
+
+    const query = `select u.name, u.email, u.accountNumber, u.identityNumber, d.name as career from users as u 
+   inner join degrees as d on u.degreeId = d.id
+   where u.role = 'student' and u.isDeleted = 'false'`
+
+    const [result] = await cnn.query(query)
+
+    return result
+}
+
 export const registerActivityForStudentModel = async(data, studentId) => {
 
     const cnn = await pool.getConnection();

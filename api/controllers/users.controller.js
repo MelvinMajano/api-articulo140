@@ -1,6 +1,6 @@
 import { IDv, NumbersV } from "../schemas/Auth.Schema.js"
 import { userExist } from "../models/auth.model.js"
-import { CurrentActivitiesDB, VOAEHours, registerActivityForStudentModel } from "../models/users.model.js"
+import { CurrentActivitiesDB, VOAEHours, getStudentsModel ,registerActivityForStudentModel } from "../models/users.model.js"
 import { validateActivityForUser } from "../schemas/ActivitiesSchema/activitiesSchema.js"
 import { validateResult, validateUserDb } from "../utils/validations.js"
 import { v4 as uuidv4 } from "uuid";
@@ -74,6 +74,24 @@ export default class UserController{
       }
 
 
+    }
+
+    static getStudents =  async (req,res) => {
+
+      try{
+
+        const students = await getStudentsModel()
+
+        if (students.length === 0){
+            return erroResponse (res,404,"No hay estudiantes registrados")
+        }
+
+        return successResponse(res,200,"Estudiantes:",students)
+
+
+      }catch (error){
+        return erroResponse(res,500,"Error al obtener estudiantes",error)
+      }
     }
 
     static registerActivityForStudent = async (req, res) => {
