@@ -14,7 +14,7 @@ const activitiesSchema = zod.object({
 export const validateActividad = async(data)=>{
     return activitiesSchema.safeParse(data);
 }
-
+ 
 const activitiesSchemaput = zod.object({
     "actividadId":zod.uuidv4(),
     "title":zod.string(),
@@ -45,4 +45,15 @@ const activitiesSchemaForUser = zod.object({
 
 export const validateActivityForUser = async(data)=>{
     return activitiesSchemaForUser.safeParse(data);
+}
+
+
+const activitiesSchemaDisableEnable = zod.object({
+    "actividadId":zod.uuidv4(),
+    "isDisableSet": zod.number().int(),
+}).strict();
+
+
+export const validateActividadDisableEneable = async(data)=>{
+    return activitiesSchemaDisableEnable.safeParse(data);
 }

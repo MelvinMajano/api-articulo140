@@ -10,7 +10,7 @@ const RegisterUserSchema = zod.object({
 
   email: zod
     .string()
-    .email('Debe ser un correo válido'),
+    .email('Debe ser un correo válido'), 
 
   password: zod
     .string()

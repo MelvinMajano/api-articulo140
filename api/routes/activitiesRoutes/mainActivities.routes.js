@@ -23,7 +23,11 @@ const mainActivitiesRouter = Router();
  *       401:
  *         description: No autorizado
  */
-mainActivitiesRouter.get('/',verifyToken,ActivitiesController.getActivityController);
+mainActivitiesRouter.get('/',/* verifyToken*/ActivitiesController.getActivityController);
+
+
+
+
 
 /**
  * @swagger
@@ -102,7 +106,9 @@ mainActivitiesRouter.get('/supervisor/:id',verifyToken,isSupervisor,ActivitiesCo
  *       401:
  *         description: No autorizado
  */
-mainActivitiesRouter.post('/',verifyToken,isAdmin,ActivitiesController.createActivityController);
+mainActivitiesRouter.post('/'/* verifyToken,isAdmin,*/,ActivitiesController.createActivityController);
+
+
 
 /**
  * @swagger
@@ -138,8 +144,13 @@ mainActivitiesRouter.post('/',verifyToken,isAdmin,ActivitiesController.createAct
  *       404:
  *         description: Actividad no encontrada
  */
-mainActivitiesRouter.put('/:id',verifyToken,isAdmin,ActivitiesController.putActivityByIdController);
+mainActivitiesRouter.put('/:id',/* verifyToken,isAdmin*/ActivitiesController.putActivityByIdController);
 
+
+
+
+mainActivitiesRouter.put('/disableEneable/:id',/* verifyToken,isAdmin*/ActivitiesController.putActivityDisableEneable);
+mainActivitiesRouter.get('/disableEneable/:id',/* verifyToken,isAdmin*/ActivitiesController.getActivityDisableEneable);
 /**
  * @swagger
  * /api/activities/{id}:
@@ -158,7 +169,7 @@ mainActivitiesRouter.put('/:id',verifyToken,isAdmin,ActivitiesController.putActi
  *         description: ID de la actividad
  *     responses:
  *       200:
- *         description: Actividad eliminada
+ *         description: Actividad eliminada 
  *       401:
  *         description: No autorizado
  *       404:

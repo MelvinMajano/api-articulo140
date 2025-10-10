@@ -29,7 +29,7 @@ const AuthRouter = Router()
  *         description: Datos inválidos
  */
 AuthRouter.post("/register",AuthController.RegisterUser)
-
+ 
 /**
  * @swagger
  * /api/auth/login:

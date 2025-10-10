@@ -6,8 +6,14 @@ export const deshabilitarActividad = async (isDisable, actividadId, connection =
         return; 
     }
     
-    const queryDeshabilitar = `update activities SET status='disabled' WHERE id=? AND isDeleted='false'`;
-    await conn.execute(queryDeshabilitar, [actividadId]);
+    try{
+        const queryDeshabilitar = `update activities SET status='disabled' WHERE id=? AND isDeleted='false'`;
+        const [rows]= await conn.execute(queryDeshabilitar, [actividadId]);
+        return rows
+    }catch(error){
+        console.log(error)
+    }
+    
 };
 
 export const habilitarActividad = async (isDisable, actividadId, connection = null) => {

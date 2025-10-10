@@ -54,6 +54,7 @@ CREATE TABLE activities (
     availableSpots INT NOT NULL,
     supervisorId CHAR(36) NOT NULL,
     status ENUM('pending', 'inProgress', 'finished', 'disabled') NOT NULL DEFAULT 'pending',
+    isDisabled ENUM('true', 'false') NOT NULL DEFAULT 'false',
     isDeleted ENUM('true', 'false') NOT NULL DEFAULT 'false',
     access ENUM('all', 'restricted') NOT NULL DEFAULT 'all',
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

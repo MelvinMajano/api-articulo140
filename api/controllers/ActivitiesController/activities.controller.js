@@ -1,5 +1,5 @@
-import { getActividadbyIdModel, getActividadModel,getActivitiesForSupervisorModel, confirmSupervisor, ValidateCreateActivitiesModel, ValitateUpdateActivitiesModel, ValidateDeleteActivitiesModel } from "../../models/activitiesModel/activities.model.js";
-import { validateActividad, validateActividadput } from "../../schemas/ActivitiesSchema/activitiesSchema.js";
+import { getActividadbyIdModel, getActividadModel,getActivitiesForSupervisorModel, confirmSupervisor, ValidateCreateActivitiesModel, ValitateUpdateActivitiesModel, ValidateDeleteActivitiesModel, ValitateActivitiesDisableEnableModel } from "../../models/activitiesModel/activities.model.js";
+import { validateActividad, validateActividadDisableEneable, validateActividadput } from "../../schemas/ActivitiesSchema/activitiesSchema.js";
 import { v4 as uuidv4 } from "uuid";
 import { successResponse, erroResponse } from "../../utils/responseHandler.js";
 import {formatDateHonduras} from "../../utils/activities/formatDateHonduras.js";
@@ -7,7 +7,7 @@ import {formatDateHonduras} from "../../utils/activities/formatDateHonduras.js";
 export class ActivitiesController {
     static getActivityController =async(req,res)=>{
          try {
-            const actividades = await getActividadModel();
+            const actividades = await getActividadModel(); 
 
             if (actividades.length === 0) {
                 return erroResponse(res, 404, 'No se encontraron actividades');
@@ -126,6 +126,48 @@ export class ActivitiesController {
             return erroResponse(res, 500, 'Hubo un problema al actualizar la actividad', error);
         }
     }   
+
+    static putActivityDisableEneable = async(req,res)=>{
+        const {id} = req.params;
+        const data = req.body;
+        data.actividadId=id;
+        const {success,error,data:safedata}=await validateActividadDisableEneable(data);
+
+        if(!success){
+            return erroResponse(res, 400, 'Error al validar la data', error);
+        }
+
+        const {isDisableSet}=safedata;
+        try {
+            const result = await ValitateActivitiesDisableEnableModel.validateActivitiesDelete(id);
+
+                if(result==='true'){
+                    return erroResponse(res, 400, 'No se puede actualizar una actividad eliminada');
+                }
+            if(isDisableSet===1){
+                const response = await ValitateActivitiesDisableEnableModel.putActividadDisableModel(safedata);
+                return successResponse(res, 200, 'La actividad fue deshabilitada', response); 
+            }else{
+                const response = await ValitateActivitiesDisableEnableModel.putActividadEnableModel(safedata);
+                return successResponse(res, 200, 'La actividad fue habilitada', response); 
+            }
+              
+        } catch (error) {
+            return erroResponse(res, 500, 'Hubo un problema al actualizar la actividad', error);
+        }
+    }   
+
+     static getActivityDisableEneable = async(req,res)=>{
+        const {id} = req.params;
+        
+        try {
+            const response = await ValitateActivitiesDisableEnableModel.getActiviyenableDisable(id);
+            return successResponse(res, 200, 'La actividad esta', response); 
+        } catch (error) {
+            return erroResponse(res, 500, 'Hubo un problema al actualizar la actividad', error);
+        }
+    }   
+
 
     static deleteActivityByIdController =async(req,res)=>{
         const {id}= req.params;

@@ -4,24 +4,23 @@ import { deshabilitarActividad, habilitarActividad } from "../../utils/activitie
 
 
 export const getActividadModel =async()=>{
-    const query = `select a.id, a.title,a.description,a.startDate, a.endDate, a.voaeHours, a.availableSpots,a.status,a.isDeleted, u.name as Supervisor, group_concat(ase.scope) as Scope from activities as a
+    const query = `select a.id, a.title,a.description,a.startDate, a.endDate, a.voaeHours, a.availableSpots,a.status,a.isDeleted,a.isDisabled, u.name as Supervisor,u.id as supervisorId, group_concat(ase.scope) as scopes from activities as a
     inner join users as u on a.supervisorId = u.id
     inner join activityScopes as ase on a.id = ase.activityId
-    where a.isDeleted = 'false' and a.status != 'disabled'
-    group by a.id, a.title,a.description, a.startDate, a.endDate, a.voaeHours, a.availableSpots, a.status, u.name, a.isDeleted`;
+    where a.isDeleted = 'false'
+    group by a.id, a.title,a.description, a.startDate, a.endDate, a.voaeHours, a.availableSpots, a.status, u.name, u.id, a.isDeleted, a.isDisabled`; 
 
     const [rows] = await pool.query(query);
-
     return rows;
 }
 
 export const getActividadbyIdModel =async(id)=>{
 
-    const query =`select a.id, a.title,a.description,a.startDate, a.endDate, a.voaeHours, a.availableSpots,a.status,a.isDeleted, u.name as Supervisor, group_concat(ase.scope) as Scope from activities as a
+    const query =`select a.id, a.title,a.description,a.startDate, a.endDate, a.voaeHours, a.availableSpots,a.status,a.isDeleted,a.isDisabled, u.name as Supervisor, u.id as SupervisorId, group_concat(ase.scope) as scopes from activities as a
     inner join users as u on a.supervisorId = u.id
     inner join activityScopes as ase on a.id = ase.activityId
-    where a.id = ? and a.isDeleted = 'false' and a.status != 'disabled'
-    group by a.id, a.title, a.description, a.startDate, a.endDate, a.voaeHours, a.availableSpots, a.status, u.name, a.isDeleted`;
+    where a.id = ? and a.isDeleted = 'false' 
+    group by a.id, a.title, a.description, a.startDate, a.endDate, a.voaeHours, a.availableSpots, a.status, u.name, u.id, a.isDeleted, a.isDisabled`;
 
     const [rows] = await pool.query(query,[id]);
     return rows;
@@ -129,6 +128,46 @@ availableSpots,supervisorId,actividadId]);
     }
 }
 }
+
+export class ValitateActivitiesDisableEnableModel {
+    static validateActivitiesDelete = async(actividadId)=>{
+        const queryIsdelete = `select isDeleted from activities where id =?`;
+    
+        const [rows] = await pool.query(queryIsdelete,[actividadId]);
+        return rows[0].isDeleted;
+    }
+
+    static putActividadDisableModel =async(data)=>{
+        const {actividadId}= data;
+
+        const query =`update activities set isDisabled='true'
+        where id=? and isDeleted='false'`
+        const [rows] = await pool.query(query,[actividadId]);
+        return rows
+        
+    }
+
+    static putActividadEnableModel =async(data)=>{
+        const {actividadId}= data;
+
+        const query =`update activities set isDisabled='false'
+        where id=? and isDeleted='false'`
+        const [rows] = await pool.query(query,[actividadId]);
+        return rows
+    }
+
+    static getActiviyenableDisable =async(id)=>{
+
+        const query =`select a.isDisabled from activities as a
+                    where id=?`
+        const [rows] = await pool.query(query,[id]); 
+        return rows[0]
+       
+    }
+}
+
+
+
 export class ValidateDeleteActivitiesModel {
     static validateActivitiesModel =async(id)=>{
         const queryInscripcion = `select *from registrations where activityId = ?`;
