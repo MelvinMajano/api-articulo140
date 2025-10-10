@@ -1,6 +1,6 @@
 import { IDv, NumbersV } from "../schemas/Auth.Schema.js"
 import { userExist } from "../models/auth.model.js"
-import { CurrentActivitiesDB, VOAEHours, getStudentsModel ,registerActivityForStudentModel } from "../models/users.model.js"
+import { CurrentActivitiesDB, VOAEHours, getStudentsModel,getSupervisorsModel,getCareersModel,registerActivityForStudentModel } from "../models/users.model.js"
 import { validateActivityForUser } from "../schemas/ActivitiesSchema/activitiesSchema.js"
 import { validateResult, validateUserDb } from "../utils/validations.js"
 import { v4 as uuidv4 } from "uuid";
@@ -91,6 +91,41 @@ export default class UserController{
 
       }catch (error){
         return erroResponse(res,500,"Error al obtener estudiantes",error)
+      }
+    }
+
+    static getSupervisors =  async (req,res) => {
+
+      try{
+
+        const supervisors = await getSupervisorsModel()
+
+        if (supervisors.length === 0){
+            return erroResponse (res,404,"No hay supervisores registrados")
+        }
+
+        return successResponse(res,200,"Supervisores:",supervisors)
+
+
+      }catch (error){
+        return erroResponse(res,500,"Error al obtener supervisores",error)
+      }
+    }
+
+     static getCareers =  async (req,res) => {
+
+      try{
+
+        const careers = await getCareersModel()
+
+        if (careers.length === 0){
+            return erroResponse (res,404,"No hay carreras registradas")
+        }
+
+        return successResponse(res,200,"Carreras:",careers)
+
+      }catch (error){
+        return erroResponse(res,500,"Error al obtener carreras",error)
       }
     }
 

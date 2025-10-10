@@ -75,7 +75,45 @@ UserRouter.get(":id/fields",verifyToken,isAdmin,UserController.ActivitiesScope)
  *       404:
  *         description: No se encontraron estudiantes
  */
-UserRouter.get("/students",verifyToken,isAdmin, UserController.getStudents)
+UserRouter.get("/students", UserController.getStudents)
+
+
+
+/** * @swagger
+ * /api/users/supervisors:
+ *   get:
+ *     summary: Obtener lista de supervisores
+ *     security:
+ *       - bearerAuth: []
+ *     tags:
+ *       - Users
+ *     responses:
+ *       200:
+ *         description: Lista de supervisores
+ *       401:
+ *         description: No autorizado
+ *       404:
+ *         description: No se encontraron supervisores
+ */
+UserRouter.get("/supervisors",UserController.getSupervisors)
+
+/** * @swagger
+ * /api/users/careers:
+ *   get:
+ *     summary: Obtener lista de carreras
+ *     security:
+ *       - bearerAuth: []
+ *     tags:
+ *       - Users
+ *     responses:
+ *       200:
+ *         description: Lista de carreras
+ *       401:
+ *         description: No autorizado
+ *       404:
+ *         description: No se encontraron carreras
+ */
+UserRouter.get("/careers",UserController.getCareers)
 
 /**
  * @swagger
