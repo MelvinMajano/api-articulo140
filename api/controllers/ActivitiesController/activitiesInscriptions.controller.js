@@ -1,4 +1,4 @@
-import { studentExists, activityExists, registerStudentModel, closeInscriptionsModel } from "../../models/activitiesModel/activitiesInscriptions.model.js";
+import { studentExists, activityExists, registerStudentModel, closeInscriptionsModel, closeActivityModel} from "../../models/activitiesModel/activitiesInscriptions.model.js";
 import { calculateAllStudentsVOAE } from "../../utils/activities/horasVOAECalculator.js";
 import { successResponse,erroResponse} from '../../utils/responseHandler.js';
 export class ActivitiesInscriptionsController {
@@ -64,7 +64,8 @@ export class ActivitiesInscriptionsController {
                return erroResponse(res, 404, "Actividad no encontrada");
             }
 
-            
+            await closeActivityModel(id);
+
             await calculateAllStudentsVOAE(id);
 
             successResponse(res, 200, 'La actividad ha sido cerrada con éxito');

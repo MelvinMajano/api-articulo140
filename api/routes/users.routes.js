@@ -2,6 +2,7 @@ import { Router } from "express";
 import UserController from "../controllers/users.controller.js";
 import { verifyToken } from "../middlewares/auth.middleware.js";
 import { isAdmin } from "../middlewares/isAdmin.middleware.js";
+import { is } from "zod/locales";
 
 const UserRouter= Router()
 
@@ -29,7 +30,7 @@ const UserRouter= Router()
  *       404:
  *         description: Usuario no encontrado
  */
-UserRouter.get(":id/activities",verifyToken,isAdmin,UserController.GetUserActivity)
+UserRouter.get("/:id/activities",verifyToken,isAdmin,UserController.GetUserActivity)
 
 /**
  * @swagger
@@ -55,7 +56,7 @@ UserRouter.get(":id/activities",verifyToken,isAdmin,UserController.GetUserActivi
  *       404:
  *         description: Usuario no encontrado
  */
-UserRouter.get(":id/fields",verifyToken,isAdmin,UserController.ActivitiesScope)
+UserRouter.get("/:id/fields",verifyToken,isAdmin,UserController.ActivitiesScope)
 
 
 /** * @swagger
@@ -74,7 +75,7 @@ UserRouter.get(":id/fields",verifyToken,isAdmin,UserController.ActivitiesScope)
  *       404:
  *         description: No se encontraron estudiantes
  */
-UserRouter.get("/students", UserController.getStudents)
+UserRouter.get("/students",verifyToken,isAdmin, UserController.getStudents)
 
 
 
@@ -94,7 +95,7 @@ UserRouter.get("/students", UserController.getStudents)
  *       404:
  *         description: No se encontraron supervisores
  */
-UserRouter.get("/supervisors",UserController.getSupervisors)
+UserRouter.get("/supervisors",verifyToken,isAdmin,UserController.getSupervisors)
 
 /** * @swagger
  * /api/users/careers:
@@ -112,7 +113,7 @@ UserRouter.get("/supervisors",UserController.getSupervisors)
  *       404:
  *         description: No se encontraron carreras
  */
-UserRouter.get("/careers",UserController.getCareers)
+UserRouter.get("/careers",verifyToken,isAdmin,UserController.getCareers)
 
 /**
  * @swagger
@@ -148,7 +149,7 @@ UserRouter.get("/careers",UserController.getCareers)
  *       404:
  *         description: Usuario no encontrado
  */
-UserRouter.post(":id/registerActivity", verifyToken,isAdmin, UserController.registerActivityForStudent);
+UserRouter.post("/:id/registerActivity", verifyToken,isAdmin, UserController.registerActivityForStudent);
 
 
 

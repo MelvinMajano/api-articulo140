@@ -20,7 +20,7 @@ const activitiesDegreesRouter = Router();
  *       401:
  *         description: No autorizado
  */
-activitiesDegreesRouter.get('/',verifyToken, isAdmin, ActivitiesDegreesController.getDegrees);
+activitiesDegreesRouter.get('/',verifyToken,isAdmin, ActivitiesDegreesController.getDegrees);
 
 /**
  * @swagger
@@ -83,7 +83,7 @@ activitiesDegreesRouter.post('/', verifyToken, isAdmin, ActivitiesDegreesControl
  *       404:
  *         description: Carrera no encontrada
  */
-activitiesDegreesRouter.put('/:id', verifyToken, isAdmin, ActivitiesDegreesController.updateDegree);
+activitiesDegreesRouter.put('/:id',verifyToken,isAdmin, ActivitiesDegreesController.updateDegree);
 
 /**
  * @swagger
@@ -109,7 +109,7 @@ activitiesDegreesRouter.put('/:id', verifyToken, isAdmin, ActivitiesDegreesContr
  *       404:
  *         description: Carrera no encontrada
  */
-activitiesDegreesRouter.delete('/:id', verifyToken, isAdmin, ActivitiesDegreesController.deleteDegree);
+activitiesDegreesRouter.delete('/:id',verifyToken,isAdmin, ActivitiesDegreesController.deleteDegree);
 
 
 export default activitiesDegreesRouter;

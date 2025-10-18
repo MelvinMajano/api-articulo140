@@ -37,7 +37,7 @@ const activitiesInscriptionsRouter = Router();
  *       401:
  *         description: No autorizado
  */
-activitiesInscriptionsRouter.post('/:activityid/register/:id'/* ,verifyToken,isStudent*/,ActivitiesInscriptionsController.registeStudentinActivity)
+activitiesInscriptionsRouter.post('/:activityid/register/:id',verifyToken,isStudent,ActivitiesInscriptionsController.registeStudentinActivity)
 
 /**
  * @swagger
@@ -63,7 +63,7 @@ activitiesInscriptionsRouter.post('/:activityid/register/:id'/* ,verifyToken,isS
  *       404:
  *         description: Actividad no encontrada
  */
-activitiesInscriptionsRouter.put('/register/end/:id',verifyToken,ActivitiesInscriptionsController.closeInscriptions)
+activitiesInscriptionsRouter.put('/register/end/:id',verifyToken,isSupervisor,ActivitiesInscriptionsController.closeInscriptions)
 
 /**
  * @swagger
