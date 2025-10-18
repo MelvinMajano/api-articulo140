@@ -12,4 +12,4 @@ activitiesRouter.use('/attendance', activitiesAttendanceRouter);
 activitiesRouter.use('/', activitiesInscriptionsRouter);
 activitiesRouter.use('/', activitiesFilesRouter);
 
-export default activitiesRouter;
+export default activitiesRouter; 

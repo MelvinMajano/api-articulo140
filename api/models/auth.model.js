@@ -12,10 +12,10 @@ export const RegisterUserBD = async (users) =>{
 
 export const GetUserByEmailDB = async (user)=>{
 
-    const query = "Select * from users where email = ?"
+    const query = "Select id,name,email,role,isDeleted,password from users where email = ?"
 
     const [resultado] = await pool.query(query,user)
-    return resultado
+    return resultado[0]
 }
 
 export const ChangePassDb = async (password,id) =>{

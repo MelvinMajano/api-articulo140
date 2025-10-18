@@ -5,7 +5,6 @@ import { isAdmin } from "../middlewares/isAdmin.middleware.js";
 
 const UserRouter= Router()
 
-
 /**
  * @swagger
  * /api/users/{id}/activities:
@@ -150,6 +149,8 @@ UserRouter.get("/careers",UserController.getCareers)
  *         description: Usuario no encontrado
  */
 UserRouter.post(":id/registerActivity", verifyToken,isAdmin, UserController.registerActivityForStudent);
+
+
 
 
 export default UserRouter

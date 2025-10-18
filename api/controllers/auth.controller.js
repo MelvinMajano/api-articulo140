@@ -54,7 +54,8 @@ static LoginUser = async (req, res) => {
         if(validateUserDb(user,res)) return
 
         
-        const match = await bcrypt.compare(password, user[0].password);
+        const match = await bcrypt.compare(password, user.password);
+        
         
         if (!match) {
             return erroResponse(res,401,"Contraseña o correo incorrecto ")
@@ -63,21 +64,55 @@ static LoginUser = async (req, res) => {
 
         
         const payload = {
-            email: user[0].email,
-            role: user[0].role,
-            id : user[0].id
+            email: user.email,
+            role: user.role,
+            id : user.id
         };
-
+        
         const token = jwt.sign(payload, process.env.JWT_SECRET, {
-            expiresIn: "12h",
+            expiresIn: "2h",
         });
-        return successResponse(res,200,"Inicio de sesión exitoso",token)
+        delete user.password
+        return successResponse(res,200,"Inicio de seccion exitoso",{user,token})
         
 
     } catch (error) {
        return  erroResponse(res,500,"Error en el login",error)
         
     }
+}
+
+static checkStatusUser = async (req, res) => {
+    const {authorization} = req.headers;
+ 
+    try{
+        const token = authorization.split(' ')[1];
+        const decoded = jwt.verify(token,process.env.JWT_SECRET);
+
+        const {email} = decoded;
+
+        const user = await GetUserByEmailDB(email); 
+        
+        const payload = {
+            email: user.email,
+            role: user.role,
+            id : user.id
+        };
+
+        const newToken = jwt.sign(payload, process.env.JWT_SECRET, {
+            expiresIn: "2h",
+        });
+
+        delete user.password
+        return successResponse(res,200,"Token chekeado",{user,newToken})
+
+    }catch(error){
+         return  erroResponse(res,500,"Hubo un error al obtener el nuevo",error)
+    }
+    
+
+    
+    
 }
 
 
@@ -183,7 +218,7 @@ static DeleteUser=async (req,res)=>{
     
     const Exist = await userExist(id)
         
-    if(validateUserDb(user,res)) return
+    if(validateUserDb(Exist,res)) return
         
     const result = await DeleteUserDB(id)   
     

@@ -37,7 +37,7 @@ const activitiesInscriptionsRouter = Router();
  *       401:
  *         description: No autorizado
  */
-activitiesInscriptionsRouter.post('/:activityid/register/:id',verifyToken,isStudent,ActivitiesInscriptionsController.registeStudentinActivity)
+activitiesInscriptionsRouter.post('/:activityid/register/:id'/* ,verifyToken,isStudent*/,ActivitiesInscriptionsController.registeStudentinActivity)
 
 /**
  * @swagger
@@ -92,3 +92,4 @@ activitiesInscriptionsRouter.put('/register/end/:id',verifyToken,ActivitiesInscr
 activitiesInscriptionsRouter.put('/finish/:id',verifyToken,isSupervisor,ActivitiesInscriptionsController.closeActivity);
 
 export default activitiesInscriptionsRouter;
+

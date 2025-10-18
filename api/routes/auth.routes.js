@@ -54,6 +54,7 @@ AuthRouter.post("/register",AuthController.RegisterUser)
  *         description: Credenciales incorrectas
  */
 AuthRouter.post("/login",AuthController.LoginUser)
+AuthRouter.get("/check-status",verifyToken,AuthController.checkStatusUser)
 
 /**
  * @swagger
