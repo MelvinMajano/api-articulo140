@@ -32,7 +32,7 @@ const activitiesAttendanceRouter = Router();
  *       401:
  *         description: No autorizado
  */
-activitiesAttendanceRouter.post('/'/* ,verifyToken,isSupervisor*/,ActivitiesAttendanceController.createAttendance);
+activitiesAttendanceRouter.post('/',verifyToken,isSupervisor,ActivitiesAttendanceController.createAttendance);
 
 /**
  * @swagger
@@ -58,7 +58,7 @@ activitiesAttendanceRouter.post('/'/* ,verifyToken,isSupervisor*/,ActivitiesAtte
  *       404:
  *         description: Actividad no encontrada
  */
-activitiesAttendanceRouter.get('/:activityid'/*,verifyToken,isAdmin */,ActivitiesAttendanceController.viewAttendancebyId);
+activitiesAttendanceRouter.get('/:activityid',verifyToken,isAdmin,ActivitiesAttendanceController.viewAttendancebyId);
 
 export default activitiesAttendanceRouter; 
 
