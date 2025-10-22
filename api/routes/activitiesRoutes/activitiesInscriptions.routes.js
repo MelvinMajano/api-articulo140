@@ -3,6 +3,7 @@ import { verifyToken } from "../../middlewares/auth.middleware.js";
 import { isStudent } from "../../middlewares/isStudent.middleware.js";
 import { ActivitiesInscriptionsController } from "../../controllers/ActivitiesController/activitiesInscriptions.controller.js";
 import { isSupervisor } from "../../middlewares/isSupervisor.middleware.js";
+import { isAdmin } from "../../middlewares/isAdmin.middleware.js";
 
 const activitiesInscriptionsRouter = Router();
 
@@ -39,6 +40,8 @@ const activitiesInscriptionsRouter = Router();
  */
 activitiesInscriptionsRouter.post('/:activityid/register/:id' ,verifyToken,isStudent,ActivitiesInscriptionsController.registeStudentinActivity)
 
+
+activitiesInscriptionsRouter.get('/:activityid/register' ,verifyToken,isSupervisor,ActivitiesInscriptionsController.getStudentsbyActivityID)
 /**
  * @swagger
  * /api/activities/register/end/{id}:

@@ -1,10 +1,12 @@
-import { studentExists, activityExists, registerStudentModel, closeInscriptionsModel, closeActivityModel} from "../../models/activitiesModel/activitiesInscriptions.model.js";
+import { studentExists, activityExists, registerStudentModel, closeInscriptionsModel, closeActivityModel, getStudentsbyActivityIDModel} from "../../models/activitiesModel/activitiesInscriptions.model.js";
 import { calculateAllStudentsVOAE } from "../../utils/activities/horasVOAECalculator.js";
 import { successResponse,erroResponse} from '../../utils/responseHandler.js';
 export class ActivitiesInscriptionsController {
     static registeStudentinActivity = async (req, res) => {
     
         const {id,activityid} = req.params
+
+        console.log(id, activityid)
 
        try{
 
@@ -30,6 +32,16 @@ export class ActivitiesInscriptionsController {
        } catch (error) {
            erroResponse(res, 500, 'Hubo un problema al registrar al estudiante', error);
        }
+    }
+
+    static getStudentsbyActivityID = async(req,res)=>{
+        const {activityid} = req.params;
+        try {
+           const response = await getStudentsbyActivityIDModel(activityid);
+           successResponse(res, 200, 'Lista de estudiantes isncritos',response);
+        } catch (error) {
+            erroResponse(res, 500, 'Hubo un problema al obtener los estudiantes de esta acitvidad', error);
+        }
     }
 
     static closeInscriptions = async (req,res) => {

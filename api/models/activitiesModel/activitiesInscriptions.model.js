@@ -56,6 +56,19 @@ export const registerStudentModel = async (studentID, activityID) => {
     }
 }
 
+export const getStudentsbyActivityIDModel =async(Activityid)=>{
+
+    const query =`select u.id, u.name, u.accountNumber, a.entryTime, a.exitTime 
+    from users as u
+    inner join registrations as r on u.id = r.studentId
+    left join attendances as a on u.id = a.studentId and r.activityId = a.activityId
+    where r.activityId = ?`;
+
+    const [rows] = await pool.query(query,[Activityid]);
+    return rows;
+}
+
+
 
 export const closeInscriptionsModel = async (activityID) => {
 

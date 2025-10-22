@@ -53,7 +53,7 @@ CREATE TABLE activities (
     voaeHours INT NOT NULL,
     availableSpots INT NOT NULL,
     supervisorId CHAR(36) NOT NULL,
-    status ENUM('pending', 'inProgress', 'finished', 'disabled') NOT NULL DEFAULT 'pending',
+    status ENUM('pending', 'inProgress', 'finished') NOT NULL DEFAULT 'pending',
     isDisabled ENUM('true', 'false') NOT NULL DEFAULT 'false',
     isDeleted ENUM('true', 'false') NOT NULL DEFAULT 'false',
     access ENUM('all', 'restricted') NOT NULL DEFAULT 'all',
