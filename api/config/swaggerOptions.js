@@ -1,35 +1,16 @@
-import swaggerJSDoc from "swagger-jsdoc";
+import { readFileSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+import yaml from "js-yaml";
 
-const swaggerOptions = {
-  definition: {
-    openapi: "3.0.0",
-    info: {
-      title: "API articulo-140",
-      version: "1.0.0",
-      description: "Documentación de la API articulo-140 usando swagger-jsdoc y swagger-ui-express",
-    },
-    components: {
-      securitySchemes: {
-        bearerAuth: {
-          type: "http",
-          scheme: "bearer",
-          bearerFormat: "JWT"
-        }
-      }
-    },
-    security: [
-      {
-        bearerAuth: []
-      }
-    ]
-  },
-  apis: [
-    "./api/routes/*.js",
-    "./api/routes/activitiesRoutes/*.js",
-    "./server.js"
-  ],
-};
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-const swaggerSpec = swaggerJSDoc(swaggerOptions);
+// Leer el archivo YAML de documentación
+const swaggerYamlPath = join(__dirname, "../swagger.yaml");
+const swaggerYamlContent = readFileSync(swaggerYamlPath, "utf8");
+
+// Parsear el contenido YAML a un objeto JavaScript
+const swaggerSpec = yaml.load(swaggerYamlContent);
 
 export default swaggerSpec;

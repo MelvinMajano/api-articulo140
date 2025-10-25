@@ -1,0 +1,1606 @@
+openapi: 3.0.0
+info:
+  title: API Artículo 140 - Sistema VOAE
+  version: 1.0.0
+  description: API REST para la gestión del Sistema de Gestión de Horas VOAE (Vinculación con la Sociedad) de la UNAH
+  contact:
+    name: MelvinMajano
+    url: https://github.com/MelvinMajano/api-articulo140
+  license:
+    name: ISC
+
+servers:
+  - url: http://localhost:4000
+    description: Servidor de desarrollo
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT para autenticación
+      
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID único del usuario
+        name:
+          type: string
+          description: Nombre completo del usuario
+        email:
+          type: string
+          format: email
+          description: Correo electrónico del usuario
+        accountNumber:
+          type: integer
+          description: Número de cuenta del estudiante
+        identityNumber:
+          type: string
+          description: Número de identidad
+        role:
+          type: string
+          enum: [admin, student, supervisor]
+          description: Rol del usuario
+        degreeId:
+          type: integer
+          description: ID de la carrera asociada
+        isDeleted:
+          type: string
+          enum: [true, false]
+          description: Estado de eliminación
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+          
+    Activity:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID único de la actividad
+        title:
+          type: string
+          description: Título de la actividad
+        description:
+          type: string
+          description: Descripción de la actividad
+        degreeId:
+          type: integer
+          description: ID de la carrera asociada
+        startDate:
+          type: string
+          format: date-time
+          description: Fecha y hora de inicio
+        endDate:
+          type: string
+          format: date-time
+          description: Fecha y hora de finalización
+        voaeHours:
+          type: integer
+          description: Horas VOAE que otorga la actividad
+        availableSpots:
+          type: integer
+          description: Cupos disponibles
+        supervisorId:
+          type: string
+          format: uuid
+          description: ID del supervisor
+        status:
+          type: string
+          enum: [pending, inProgress, finished]
+          description: Estado de la actividad
+        isDisabled:
+          type: string
+          enum: [true, false]
+          description: Estado de habilitación
+        isDeleted:
+          type: string
+          enum: [true, false]
+          description: Estado de eliminación
+        access:
+          type: string
+          enum: [all, restricted]
+          description: Tipo de acceso
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+          
+    Degree:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID único de la carrera
+        code:
+          type: string
+          description: Código de la carrera
+        name:
+          type: string
+          description: Nombre de la carrera
+        faculty:
+          type: string
+          description: Facultad a la que pertenece
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+          
+    Attendance:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID único de la asistencia
+        studentId:
+          type: string
+          format: uuid
+          description: ID del estudiante
+        activityId:
+          type: string
+          format: uuid
+          description: ID de la actividad
+        entryTime:
+          type: string
+          format: date-time
+          description: Hora de entrada
+        exitTime:
+          type: string
+          format: date-time
+          description: Hora de salida
+        observations:
+          type: string
+          description: Observaciones
+        hoursAwarded:
+          type: integer
+          description: Horas otorgadas
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+          
+    Registration:
+      type: object
+      properties:
+        studentId:
+          type: string
+          format: uuid
+          description: ID del estudiante
+        activityId:
+          type: string
+          format: uuid
+          description: ID de la actividad
+        registrationDate:
+          type: string
+          format: date-time
+          description: Fecha de inscripción
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+          
+    File:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID único del archivo
+        activityId:
+          type: string
+          format: uuid
+          description: ID de la actividad asociada
+        fileName:
+          type: string
+          description: Nombre del archivo
+        url:
+          type: string
+          description: URL del archivo
+        fileType:
+          type: string
+          description: Tipo de archivo
+        fileSize:
+          type: integer
+          description: Tamaño del archivo en bytes
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+          
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Mensaje de error
+        error:
+          type: string
+          description: Detalles del error
+        status:
+          type: integer
+          description: Código de estado HTTP
+          
+    Success:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Mensaje de éxito
+        data:
+          type: object
+          description: Datos de respuesta
+
+security:
+  - bearerAuth: []
+
+paths:
+  # AUTH ENDPOINTS
+  /api/auth/register:
+    post:
+      tags:
+        - Autenticación
+      summary: Registrar nuevo usuario
+      description: Crear una nueva cuenta de usuario en el sistema
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+                - role
+              properties:
+                name:
+                  type: string
+                  example: "Juan Pérez"
+                email:
+                  type: string
+                  format: email
+                  example: "juan.perez@unah.hn"
+                password:
+                  type: string
+                  minLength: 6
+                  example: "password123"
+                accountNumber:
+                  type: integer
+                  example: 20181234567
+                identityNumber:
+                  type: string
+                  example: "0801-1990-12345"
+                role:
+                  type: string
+                  enum: [admin, student, supervisor]
+                  example: "student"
+                degreeId:
+                  type: integer
+                  example: 1
+      responses:
+        '201':
+          description: Usuario registrado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  /api/auth/login:
+    post:
+      tags:
+        - Autenticación
+      summary: Iniciar sesión
+      description: Autenticar usuario y obtener token JWT
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "juan.perez@unah.hn"
+                password:
+                  type: string
+                  example: "password123"
+      responses:
+        '200':
+          description: Login exitoso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Login exitoso"
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Credenciales inválidas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  /api/auth/check-status:
+    get:
+      tags:
+        - Autenticación
+      summary: Verificar estado del token
+      description: Verificar si el token JWT es válido y obtener información del usuario
+      responses:
+        '200':
+          description: Token válido
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Token válido"
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Token inválido o expirado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  /api/auth/password/{id}:
+    put:
+      tags:
+        - Autenticación
+      summary: Actualizar contraseña
+      description: Cambiar la contraseña de un usuario
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID del usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - currentPassword
+                - newPassword
+              properties:
+                currentPassword:
+                  type: string
+                  example: "oldpassword123"
+                newPassword:
+                  type: string
+                  minLength: 6
+                  example: "newpassword123"
+      responses:
+        '200':
+          description: Contraseña actualizada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Contraseña actual incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  /api/auth/data/{id}:
+    put:
+      tags:
+        - Autenticación
+      summary: Actualizar datos del usuario
+      description: Actualizar información personal del usuario
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID del usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Juan Carlos Pérez"
+                email:
+                  type: string
+                  format: email
+                  example: "juan.carlos@unah.hn"
+                accountNumber:
+                  type: integer
+                  example: 20181234567
+                identityNumber:
+                  type: string
+                  example: "0801-1990-12345"
+      responses:
+        '200':
+          description: Datos actualizados exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  /api/auth/delete/{id}:
+    delete:
+      tags:
+        - Autenticación
+      summary: Eliminar usuario (Solo Admin)
+      description: Eliminar un usuario del sistema (soft delete)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID del usuario a eliminar
+      responses:
+        '200':
+          description: Usuario eliminado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '403':
+          description: Acceso denegado - Solo administradores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # USER ENDPOINTS
+  /api/users/{id}/activities:
+    get:
+      tags:
+        - Usuarios
+      summary: Obtener actividades de un usuario
+      description: Listar todas las actividades en las que participa un usuario
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID del usuario
+      responses:
+        '200':
+          description: Lista de actividades del usuario
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  activities:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Activity'
+        '404':
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  /api/users/{id}/fields:
+    get:
+      tags:
+        - Usuarios
+      summary: Obtener ámbitos de actividades de un usuario
+      description: Obtener los diferentes ámbitos (cultural, académico, etc.) de las actividades de un usuario
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID del usuario
+      responses:
+        '200':
+          description: Ámbitos de actividades del usuario
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  fields:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        scope:
+                          type: string
+                          enum: [cultural, cientificoAcademico, deportivo, social]
+                        hours:
+                          type: integer
+        '404':
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  /api/users/students:
+    get:
+      tags:
+        - Usuarios
+      summary: Obtener lista de estudiantes
+      description: Listar todos los usuarios con rol de estudiante
+      responses:
+        '200':
+          description: Lista de estudiantes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  students:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+        '403':
+          description: Acceso denegado - Solo administradores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  /api/users/supervisors:
+    get:
+      tags:
+        - Usuarios
+      summary: Obtener lista de supervisores
+      description: Listar todos los usuarios con rol de supervisor
+      responses:
+        '200':
+          description: Lista de supervisores
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  supervisors:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+        '403':
+          description: Acceso denegado - Solo administradores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  /api/users/careers:
+    get:
+      tags:
+        - Usuarios
+      summary: Obtener lista de carreras
+      description: Listar todas las carreras disponibles en el sistema
+      responses:
+        '200':
+          description: Lista de carreras
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  careers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Degree'
+        '403':
+          description: Acceso denegado - Solo administradores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  /api/users/{id}/registerActivity:
+    post:
+      tags:
+        - Usuarios
+      summary: Registrar actividad para estudiante
+      description: Registrar manualmente un estudiante en una actividad (solo admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID del estudiante
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - activityId
+              properties:
+                activityId:
+                  type: string
+                  format: uuid
+                  example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        '201':
+          description: Estudiante registrado en la actividad
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error en el registro
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acceso denegado - Solo administradores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # MAIN ACTIVITIES ENDPOINTS
+  /api/activities:
+    get:
+      tags:
+        - Actividades
+      summary: Obtener todas las actividades
+      description: Listar todas las actividades disponibles en el sistema
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, inProgress, finished]
+          description: Filtrar por estado de la actividad
+        - name: degreeId
+          in: query
+          schema:
+            type: integer
+          description: Filtrar por carrera
+      responses:
+        '200':
+          description: Lista de actividades
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  activities:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Activity'
+                      
+    post:
+      tags:
+        - Actividades
+      summary: Crear nueva actividad
+      description: Crear una nueva actividad VOAE (solo admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - description
+                - degreeId
+                - startDate
+                - endDate
+                - voaeHours
+                - availableSpots
+                - supervisorId
+              properties:
+                title:
+                  type: string
+                  example: "Taller de Programación"
+                description:
+                  type: string
+                  example: "Taller básico de programación en JavaScript"
+                degreeId:
+                  type: integer
+                  example: 1
+                startDate:
+                  type: string
+                  format: date-time
+                  example: "2025-11-01T08:00:00Z"
+                endDate:
+                  type: string
+                  format: date-time
+                  example: "2025-11-01T12:00:00Z"
+                voaeHours:
+                  type: integer
+                  example: 4
+                availableSpots:
+                  type: integer
+                  example: 30
+                supervisorId:
+                  type: string
+                  format: uuid
+                  example: "123e4567-e89b-12d3-a456-426614174000"
+                access:
+                  type: string
+                  enum: [all, restricted]
+                  example: "all"
+      responses:
+        '201':
+          description: Actividad creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acceso denegado - Solo administradores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  /api/activities/{id}:
+    get:
+      tags:
+        - Actividades
+      summary: Obtener actividad por ID
+      description: Obtener información detallada de una actividad específica
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID de la actividad
+      responses:
+        '200':
+          description: Actividad encontrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  activity:
+                    $ref: '#/components/schemas/Activity'
+        '404':
+          description: Actividad no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+    put:
+      tags:
+        - Actividades
+      summary: Actualizar actividad
+      description: Actualizar información de una actividad (solo admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID de la actividad
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                startDate:
+                  type: string
+                  format: date-time
+                endDate:
+                  type: string
+                  format: date-time
+                voaeHours:
+                  type: integer
+                availableSpots:
+                  type: integer
+                status:
+                  type: string
+                  enum: [pending, inProgress, finished]
+      responses:
+        '200':
+          description: Actividad actualizada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acceso denegado - Solo administradores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Actividad no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+    delete:
+      tags:
+        - Actividades
+      summary: Eliminar actividad
+      description: Eliminar una actividad del sistema (solo admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID de la actividad
+      responses:
+        '200':
+          description: Actividad eliminada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '403':
+          description: Acceso denegado - Solo administradores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Actividad no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  /api/activities/supervisor/{id}:
+    get:
+      tags:
+        - Actividades
+      summary: Obtener actividades de un supervisor
+      description: Obtener todas las actividades asignadas a un supervisor específico
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID del supervisor
+      responses:
+        '200':
+          description: Lista de actividades del supervisor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  activities:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Activity'
+        '403':
+          description: Acceso denegado - Solo supervisores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Supervisor no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  /api/activities/disableEneable/{id}:
+    put:
+      tags:
+        - Actividades
+      summary: Habilitar/Deshabilitar actividad
+      description: Cambiar el estado de habilitación de una actividad (solo admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID de la actividad
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - isDisabled
+              properties:
+                isDisabled:
+                  type: string
+                  enum: [true, false]
+                  example: "false"
+      responses:
+        '200':
+          description: Estado de la actividad actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '403':
+          description: Acceso denegado - Solo administradores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Actividad no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+    get:
+      tags:
+        - Actividades
+      summary: Obtener estado de habilitación de actividad
+      description: Verificar si una actividad está habilitada o deshabilitada (solo admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID de la actividad
+      responses:
+        '200':
+          description: Estado de habilitación de la actividad
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  isDisabled:
+                    type: string
+                    enum: [true, false]
+        '403':
+          description: Acceso denegado - Solo administradores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Actividad no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # INSCRIPTIONS ENDPOINTS
+  /api/activities/{activityid}/register/{id}:
+    post:
+      tags:
+        - Inscripciones
+      summary: Registrar estudiante en actividad
+      description: Inscribir un estudiante en una actividad específica
+      parameters:
+        - name: activityid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID de la actividad
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID del estudiante
+      responses:
+        '201':
+          description: Estudiante registrado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error en el registro (cupos llenos, ya registrado, etc.)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acceso denegado - Solo estudiantes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Actividad o estudiante no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  /api/activities/{activityid}/register:
+    get:
+      tags:
+        - Inscripciones
+      summary: Obtener estudiantes registrados en actividad
+      description: Listar todos los estudiantes inscritos en una actividad específica
+      parameters:
+        - name: activityid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID de la actividad
+      responses:
+        '200':
+          description: Lista de estudiantes registrados
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  students:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/User'
+                        - type: object
+                          properties:
+                            registrationDate:
+                              type: string
+                              format: date-time
+        '403':
+          description: Acceso denegado - Solo supervisores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Actividad no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  /api/activities/register/end/{id}:
+    put:
+      tags:
+        - Inscripciones
+      summary: Cerrar inscripciones
+      description: Cerrar el periodo de inscripciones para una actividad
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID de la actividad
+      responses:
+        '200':
+          description: Inscripciones cerradas exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '403':
+          description: Acceso denegado - Solo supervisores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Actividad no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  /api/activities/finish/{id}:
+    put:
+      tags:
+        - Inscripciones
+      summary: Finalizar actividad
+      description: Marcar una actividad como finalizada
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID de la actividad
+      responses:
+        '200':
+          description: Actividad finalizada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '403':
+          description: Acceso denegado - Solo supervisores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Actividad no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # ATTENDANCE ENDPOINTS
+  /api/activities/attendance:
+    post:
+      tags:
+        - Asistencias
+      summary: Registrar asistencia
+      description: Registrar la asistencia de un estudiante a una actividad
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - studentId
+                - activityId
+                - entryTime
+              properties:
+                studentId:
+                  type: string
+                  format: uuid
+                  example: "123e4567-e89b-12d3-a456-426614174000"
+                activityId:
+                  type: string
+                  format: uuid
+                  example: "987fcdeb-51a2-43d1-9f4c-123456789abc"
+                entryTime:
+                  type: string
+                  format: date-time
+                  example: "2025-11-01T08:00:00Z"
+                exitTime:
+                  type: string
+                  format: date-time
+                  example: "2025-11-01T12:00:00Z"
+                observations:
+                  type: string
+                  example: "Participación completa en el taller"
+      responses:
+        '201':
+          description: Asistencia registrada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error al registrar asistencia
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acceso denegado - Solo supervisores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  /api/activities/attendance/{activityid}:
+    get:
+      tags:
+        - Asistencias
+      summary: Obtener asistencias de una actividad
+      description: Listar todas las asistencias registradas para una actividad específica
+      parameters:
+        - name: activityid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID de la actividad
+      responses:
+        '200':
+          description: Lista de asistencias de la actividad
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  attendances:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/Attendance'
+                        - type: object
+                          properties:
+                            student:
+                              $ref: '#/components/schemas/User'
+        '403':
+          description: Acceso denegado - Solo administradores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Actividad no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # DEGREES ENDPOINTS
+  /api/activities/degrees:
+    get:
+      tags:
+        - Carreras
+      summary: Obtener todas las carreras
+      description: Listar todas las carreras disponibles en el sistema
+      responses:
+        '200':
+          description: Lista de carreras
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  degrees:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Degree'
+        '403':
+          description: Acceso denegado - Solo administradores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                      
+    post:
+      tags:
+        - Carreras
+      summary: Crear nueva carrera
+      description: Agregar una nueva carrera al sistema (solo admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - code
+                - name
+                - faculty
+              properties:
+                code:
+                  type: string
+                  example: "IS002"
+                name:
+                  type: string
+                  example: "Ingeniería en Sistemas"
+                faculty:
+                  type: string
+                  example: "Facultad de Ingeniería"
+      responses:
+        '201':
+          description: Carrera creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acceso denegado - Solo administradores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/activities/degrees/{id}:
+    put:
+      tags:
+        - Carreras
+      summary: Actualizar carrera
+      description: Actualizar información de una carrera (solo admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID de la carrera
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+                  example: "IS003"
+                name:
+                  type: string
+                  example: "Ingeniería en Sistemas Actualizada"
+                faculty:
+                  type: string
+                  example: "Facultad de Ingeniería"
+      responses:
+        '200':
+          description: Carrera actualizada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acceso denegado - Solo administradores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Carrera no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    
+    delete:
+      tags:
+        - Carreras
+      summary: Eliminar carrera
+      description: Eliminar una carrera del sistema (solo admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID de la carrera
+      responses:
+        '200':
+          description: Carrera eliminada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '403':
+          description: Acceso denegado - Solo administradores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Carrera no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # FILES ENDPOINTS
+  /api/activities/{id}/files:
+    post:
+      tags:
+        - Archivos
+      summary: Subir archivo a actividad
+      description: Subir un archivo asociado a una actividad específica (solo admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID de la actividad
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Archivo a subir
+      responses:
+        '201':
+          description: Archivo subido exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error al subir archivo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acceso denegado - Solo administradores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Actividad no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+    get:
+      tags:
+        - Archivos
+      summary: Obtener archivos de una actividad
+      description: Listar todos los archivos asociados a una actividad específica (solo admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID de la actividad
+      responses:
+        '200':
+          description: Lista de archivos de la actividad
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  files:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/File'
+        '403':
+          description: Acceso denegado - Solo administradores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Actividad no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'

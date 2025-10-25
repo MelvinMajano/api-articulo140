@@ -114,11 +114,18 @@ El servidor estará disponible en: `http://localhost:3000`
 
 ## 📚 Documentación de la API
 
-Una vez que el servidor esté ejecutándose, puedes acceder a la documentación interactiva de Swagger en:
+La documentación de la API está definida en formato OpenAPI 3.0 en el archivo `api/swagger.yaml`. Una vez que el servidor esté ejecutándose, puedes acceder a la documentación interactiva de Swagger en:
 
 ```
 http://localhost:3000/api-docs
 ```
+
+La documentación incluye:
+- Especificaciones completas de todos los endpoints
+- Esquemas de datos detallados
+- Ejemplos de requests y responses
+- Información de autenticación JWT
+- Agrupación por funcionalidades (Auth, Usuarios, Actividades, etc.)
 
 ## 🔐 Autenticación
 
