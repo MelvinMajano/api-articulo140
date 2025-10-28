@@ -8,7 +8,7 @@ const mainActivitiesRouter = Router();
 
 mainActivitiesRouter.get('/', verifyToken,ActivitiesController.getActivityController);
 
-mainActivitiesRouter.get('/deletedActivities',verifyToken,isAdmin, ActivitiesController.getDeletedActivitiesController);
+mainActivitiesRouter.get('/deleted', verifyToken,isAdmin,ActivitiesController.getDeletedActivitiesController);
 
 mainActivitiesRouter.get('/:id',verifyToken,ActivitiesController.getActivityByIdController);
 
