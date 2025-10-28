@@ -828,6 +828,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+
+  /api/activities/deletedActivities:
+    get:
+      tags:
+        - Actividades
+      summary: Obtener actividades eliminadas
+      description: Listar todas las actividades que han sido eliminadas (soft delete) (solo admin)
+      responses:
+        '200':
+          description: Lista de actividades eliminadas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  activities:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Activity'
+        '403':
+          description: Acceso denegado - Solo administradores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    
                 
   /api/activities/{id}:
     get:

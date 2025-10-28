@@ -169,6 +169,19 @@ export class ValitateActivitiesDisableEnableModel {
 
 
 export class ValidateDeleteActivitiesModel {
+
+    static getDeletedActivitiesModel = async () => {
+        const query = `select a.id, a.title, a.description, u.name as supervisor , a.startDate, a.endDate, a.voaeHours, group_concat(ase.scope) as scopes , a.availableSpots from activities as a
+                       inner join users as u on u.id = a.supervisorId
+                       inner join activityScopes as ase on ase.activityId = a.id 
+                       where a.isDeleted = 'true'
+                       group by a.id, a.title, a.description, a.startDate, a.endDate, a.voaeHours, a.availableSpots, u.name`
+
+        const [rows] = await pool.query(query);
+        return rows;
+
+    }
+    
     static validateActivitiesModel =async(id)=>{
         const queryInscripcion = `select *from registrations where activityId = ?`;
         const [registros] = await pool.query(queryInscripcion,[id]);

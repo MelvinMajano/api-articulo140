@@ -26,6 +26,27 @@ export class ActivitiesController {
         }
     }
 
+    static getDeletedActivitiesController = async(req,res) => {
+        try {
+           const deletedActivities = await ValidateDeleteActivitiesModel.getDeletedActivitiesModel();
+
+           if (deletedActivities.length === 0) {
+               return erroResponse(res, 404, 'No se encontraron actividades eliminadas');
+           }
+
+              const formatedDeletedActivities = deletedActivities.map(actividad => ({
+                  ...actividad,
+                  startDate: formatDateHonduras(actividad.startDate),
+                  endDate: formatDateHonduras(actividad.endDate),
+              }));
+
+              return successResponse(res, 200, formatedDeletedActivities);
+
+        } catch (error) {
+            return erroResponse(res, 500, 'Error al obtener las actividades eliminadas', error);
+        }
+    }
+
     static getActivityByIdController = async(req,res)=>{
 
         const {id} = req.params;
