@@ -40,7 +40,7 @@ export class ActivitiesController {
                   endDate: formatDateHonduras(actividad.endDate),
               }));
 
-              return successResponse(res, 200, formatedDeletedActivities);
+              return successResponse(res, 200, "Actividades eliminadas:", formatedDeletedActivities);
 
         } catch (error) {
             return erroResponse(res, 500, 'Error al obtener las actividades eliminadas', error);
