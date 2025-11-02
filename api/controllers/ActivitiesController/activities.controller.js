@@ -1,13 +1,23 @@
-import { getActividadbyIdModel, getActividadModel,getActivitiesForSupervisorModel, confirmSupervisor, ValidateCreateActivitiesModel, ValitateUpdateActivitiesModel, ValidateDeleteActivitiesModel, ValitateActivitiesDisableEnableModel } from "../../models/activitiesModel/activities.model.js";
+import { getActividadbyIdModel, getActividadModel,getActivitiesForSupervisorModel, confirmSupervisor, ValidateCreateActivitiesModel, ValitateUpdateActivitiesModel, ValidateDeleteActivitiesModel, ValitateActivitiesDisableEnableModel, TotalActividadModel } from "../../models/activitiesModel/activities.model.js";
 import { validateActividad, validateActividadDisableEneable, validateActividadput } from "../../schemas/ActivitiesSchema/activitiesSchema.js";
 import { v4 as uuidv4 } from "uuid";
 import { successResponse, erroResponse } from "../../utils/responseHandler.js";
 import {formatDateHonduras} from "../../utils/activities/formatDateHonduras.js";
+import { validateOptions } from "../../utils/activities/validateOptionsPaination.js";
 
 export class ActivitiesController {
     static getActivityController =async(req,res)=>{
+            const {page,limit} = req.query;
+            const {validatePage,validateLimit} = validateOptions(page,limit)
+
+            const offset = (validatePage - 1) * validateLimit;
+            const options = {
+                validatePage,
+                validateLimit,
+                offset
+            }
          try {
-            const actividades = await getActividadModel(); 
+            const actividades = await getActividadModel(options); 
 
             if (actividades.length === 0) {
                 return erroResponse(res, 404, 'No se encontraron actividades');
@@ -19,7 +29,21 @@ export class ActivitiesController {
                 endDate: formatDateHonduras(actividad.endDate),
             }));
 
-            return successResponse(res, 200, formatedActivities);
+            const countResult = await TotalActividadModel();
+        
+            const total = countResult[0].total;
+
+            const result = {
+                data:formatedActivities,
+                pagination:{
+                    total,
+                    page,
+                    limit,
+                    totalPage:Math.ceil(total/limit),
+                },
+            };
+
+            return successResponse(res, 200, "La activiades se obtuvieron con exito" ,result);
 
         } catch (error) {
             return erroResponse(res, 500, 'Error al obtener las actividades', error);

@@ -67,7 +67,7 @@ export const getSupervisorsModel = async () => {
 
     const cnn = await pool.getConnection()
 
-    const query = `select u.name, u.email, u.accountNumber, u.identityNumber, d.name as career from users as u
+    const query = `select u.id, u.name, u.email, u.accountNumber, u.identityNumber, d.name as career from users as u
    inner join degrees as d on u.degreeId = d.id
    where u.role = 'supervisor' and u.isDeleted = 'false'`
 
