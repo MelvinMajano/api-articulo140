@@ -1,39 +1,65 @@
-import { getActivitiesFilesModel, postActivitiesFilesModel } from "../../models/activitiesModel/activitiesFile.model.js";
-import { validateFile } from "../../schemas/ActivitiesSchema/activitiesFileShema.js";
-import { v4 as uuidv4 } from "uuid";
 import { successResponse, erroResponse } from "../../utils/responseHandler.js";
+import { v2 as cloudinary } from "cloudinary";
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export class ActivitiesFilesController {
-    static getActivitiesFilesController =async(req,res)=>{
-        const {id} = req.params;
+    static getFilesController =async(req,res)=>{
+         try {
+        const allImages = await cloudinary.api.resources({
+            resource_type: 'image',
+            type: 'upload',
+        });
+
+        const filteredImages = allImages.resources.filter(
+            image => image.asset_folder === 'ARTICULO140IMAGES'
+        );
+
+        return successResponse(res, 200, "Las imágenes son:", filteredImages);
+    } catch (error) {
+        return erroResponse(res, error.message);
+    }
+    }
+
+    static postFilesController =async(req,res)=>{
+        
         try {
-            const response = await getActivitiesFilesModel(id)
-            return successResponse(res,200,response)
+
+            const file = req.file;
+            if (!file) {
+                return erroResponse(res, 400, 'No se ha proporcionado ningún archivo');
+            }
+            const result = await cloudinary.uploader.upload(file.path, {
+                folder: 'ARTICULO140IMAGES',
+            });
+
+            return successResponse(res, 201, 'Archivo subido con éxito', result);
+            
         } catch (error) {
-            return erroResponse(res,500,'hubo un error al obtener el archivo',error)
+            return erroResponse(res, error.message);
         }
     }
 
-    static postActivitiesFilesController =async(req,res)=>{
-        const data = req.body
-        const {id} = req.params;
-        data.actividad_id=id
-        const {success,error,data:safedata} = await validateFile(data);
-                
-        if(!success){
-            return erroResponse(res,404,'hubo un error al validar la data',error);
-        };
+    static deleteFilesController = async (req, res) => {
+        const { public_id } = req.body;
 
-        //TODO:Implementar el metodo para subir el archivo a la nube y obtener la url
-
-        const url=''
-        safedata.id=uuidv4();
-        safedata.url=url;
         try {
-            await postActivitiesFilesModel(safedata);
-            return successResponse(res, 200, 'Se añadio el archivo con exito');
+            
+            const result = await cloudinary.uploader.destroy(public_id, {
+            resource_type: 'image',
+            });
+
+            if (result.result !== 'ok') {
+              return erroResponse(res, 400, 'No se pudo eliminar el archivo', result);
+            }
+
+            return successResponse(res, 200, 'Archivo eliminado con éxito', result);
         } catch (error) {
-            return erroResponse(res, 500, 'hubo un error al añadir el archivo', error);
+            return erroResponse(res, error.message);
         }
     }
 }

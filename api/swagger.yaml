@@ -1540,72 +1540,12 @@ paths:
                 $ref: '#/components/schemas/Error'
 
   # FILES ENDPOINTS
-  /api/activities/{id}/files:
-    post:
-      tags:
-        - Archivos
-      summary: Subir archivo a actividad
-      description: Subir un archivo asociado a una actividad específica (solo admin)
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-          description: ID de la actividad
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              required:
-                - file
-              properties:
-                file:
-                  type: string
-                  format: binary
-                  description: Archivo a subir
-      responses:
-        '201':
-          description: Archivo subido exitosamente
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Success'
-        '400':
-          description: Error al subir archivo
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '403':
-          description: Acceso denegado - Solo administradores
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: Actividad no encontrada
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-                
+  /api/activities/images/files:
     get:
       tags:
         - Archivos
-      summary: Obtener archivos de una actividad
-      description: Listar todos los archivos asociados a una actividad específica (solo admin)
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-          description: ID de la actividad
+      summary: Recupera las imagenes cargadas de actividades o portadas
+      description: Recupera un archivo asociado a una actividad específica (solo admin)
       responses:
         '200':
           description: Lista de archivos de la actividad
@@ -1626,8 +1566,67 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '404':
-          description: Actividad no encontrada
+
+  /api/activities/images/upload:
+    post:
+      tags:
+        - Archivos
+      summary: Subir una imagen para una actividad o portada
+      description: Subir un archivo asociado a una actividad específica (solo admin)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Archivo de imagen a subir
+      responses:
+        '201':
+          description: Archivo subido exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error al subir el archivo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Acceso denegado - Solo administradores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/activities/images/delete:
+    delete:
+      tags:
+        - Archivos
+      summary: Eliminar una imagen de una actividad o portada
+      description: Eliminar un archivo asociado a una actividad específica (solo admin)
+      parameters:
+        - name: fileId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID del archivo a eliminar
+      responses:
+        '200':
+          description: Archivo eliminado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '403':
+          description: Acceso denegado - Solo administradores
           content:
             application/json:
               schema:
