@@ -9,6 +9,8 @@ UserRouter.get("/:id/activities",verifyToken,isAdmin,UserController.GetUserActiv
 UserRouter.get("/:id/fields",verifyToken,isAdmin,UserController.ActivitiesScope)
 UserRouter.get("/students",verifyToken,isAdmin, UserController.getStudents)
 UserRouter.get("/supervisors",verifyToken,isAdmin,UserController.getSupervisors)
+UserRouter.put("/supervisor/:accountNumber/disable",verifyToken,isAdmin, UserController.disableSupervisor)
+UserRouter.put("/supervisor/:accountNumber/enable",verifyToken,isAdmin, UserController.enableSupervisor)
 UserRouter.get("/careers",verifyToken,isAdmin,UserController.getCareers)
 UserRouter.post("/:id/registerActivity", verifyToken,isAdmin, UserController.registerActivityForStudent);
 

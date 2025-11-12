@@ -1,6 +1,6 @@
 import { IDv, NumbersV } from "../schemas/Auth.Schema.js"
 import { userExist } from "../models/auth.model.js"
-import { CurrentActivitiesDB, VOAEHours, getStudentsModel,getSupervisorsModel,getCareersModel,registerActivityForStudentModel } from "../models/users.model.js"
+import { CurrentActivitiesDB, VOAEHours, getStudentsModel,getSupervisorsModel,disableSupervisorModel,enableSupervisorModel,getCareersModel,registerActivityForStudentModel } from "../models/users.model.js"
 import { validateActivityForUser } from "../schemas/ActivitiesSchema/activitiesSchema.js"
 import { validateResult, validateUserDb } from "../utils/validations.js"
 import { v4 as uuidv4 } from "uuid";
@@ -111,6 +111,44 @@ export default class UserController{
         return erroResponse(res,500,"Error al obtener supervisores",error)
       }
     }
+
+    static disableSupervisor = async (req,res) => {
+
+      const {accountNumber} = req.params
+
+     try {
+
+       const result = await disableSupervisorModel(accountNumber)
+
+       if (result.affectedRows === 0) {
+         return erroResponse(res,404,"Supervisor no encontrado")
+       }
+
+       return successResponse(res,200,"Supervisor actualizado con éxito")
+
+     } catch (error) {
+       return erroResponse(res,500,"Error al actualizar supervisor",error)
+     }
+   }
+
+   static enableSupervisor = async (req,res) => {
+
+      const {accountNumber} = req.params
+
+     try {
+
+       const result = await enableSupervisorModel(accountNumber)
+
+       if (result.affectedRows === 0) {
+         return erroResponse(res,404,"Supervisor no encontrado")
+       }
+
+       return successResponse(res,200,"Supervisor actualizado con éxito")
+
+     } catch (error) {
+       return erroResponse(res,500,"Error al actualizar supervisor",error)
+     }
+   }
 
      static getCareers =  async (req,res) => {
 

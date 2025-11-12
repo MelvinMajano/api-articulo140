@@ -167,35 +167,20 @@ static UpdatePassword = async (req,res)=>{
 }
 
 static UpdateData = async (req,res)=>{
-    let {id:ID,name,email,degreeId,role} = req.body
+    const {id:ID,name,email,degreeId} = req.body
     const {id} =  req.params
-    const {authorization} = req.headers
-    const data={ID,name,email,degreeId,role}
+    const data={ID,name,email,degreeId}
 
     try{
 
         const filter = await UpdateD(data)
          if(validateResult(filter,res)) return
-
-        const token  = authorization.split(' ')[1]
-        const decoded = jwt.verify(token,process.env.JWT_SECRET)
-        const Exist = await userExist(id)
         
-        if(validateUserDb(Exist,res)) return
-
-        if(decoded.role ==="admin" && name !==undefined){
-
-            const result = await AdminChangeDb(ID,role)
-            
-            return successResponse(res,201,"Actualizacion de Rol Exitosa")
-
-        }
-        console.log(Exist)
         if(name === undefined){name=Exist[0].name}
         if(email === undefined){email=Exist[0].email}
         if(degreeId===undefined){degreeId=Exist[0].degreeId}
 
-        console.log(name,email,degreeId)
+       
         const Update = await UpdateDataDB(name,email,degreeId,id)
        
         if(Update){

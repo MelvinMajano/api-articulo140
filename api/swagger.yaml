@@ -648,6 +648,78 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+
+  /api/users/supervisor/{accountNumber}/disable:
+    put:
+      tags:
+        - Usuarios
+      summary: Habilitar/Deshabilitar supervisor
+      description: Cambiar el estado de habilitación de un supervisor (solo admin)
+      parameters:
+        - name: accountNumber
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Número de cuenta del supervisor
+      responses:
+        '200':
+          description: Estado del supervisor actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '403':
+          description: Acceso denegado - Solo administradores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Supervisor no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/users/supervisor/{accountNumber}/enable:
+    put:
+      tags:
+        - Usuarios
+      summary: Habilitar supervisor
+      description: Cambiar el estado de habilitación de un supervisor a habilitado (solo admin)
+      parameters:
+        - name: accountNumber
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Número de cuenta del supervisor
+      responses:
+        '200':
+          description: Estado de habilitación del supervisor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  isDisabled:
+                    type: string
+                    enum: [true, false]
+        '403':
+          description: Acceso denegado - Solo administradores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Supervisor no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
                 
   /api/users/careers:
     get:
