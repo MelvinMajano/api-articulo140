@@ -27,23 +27,31 @@ export const registerAttendanceModel = async (attendances) => {
   }
 };
 
-export const getAttendanceModel = async (activityID) => {
-
-  const cnn = await pool.getConnection()
-
+export const getAttendanceModel = async (options) => {
+  const {validateLimit,offset,activityid} =options;
+  
   try{
 
-    const query = `select u.name, u.accountNumber, u.email, a.entryTime, a.exitTime , a.hoursAwarded, group_concat(ac.scope) as Scope 
+    const query = `select u.accountNumber, u.name, a.entryTime, a.exitTime , a.hoursAwarded, group_concat(ac.scope) as Scope 
                    from attendances as a
                    inner join users as u on u.id = a.studentId
                    inner join activityScopes as ac on ac.activityId = a.activityId
                    where a.activityId = ?
-                   group by  u.name, u.accountNumber, u.email, a.entryTime, a.exitTime, a.hoursAwarded;`
+                   group by a.id, u.name, u.accountNumber, u.email, a.entryTime, a.exitTime, a.hoursAwarded
+                   order by u.accountNumber DESC
+                   LIMIT ? OFFSET ?`
 
-    const [rows] = await cnn.execute(query, [activityID])
+    const [rows] = await pool.query(query, [activityid, validateLimit, offset])
     return rows
-
+    
   } catch(error) {
+    console.log(error)
     throw error;
   }
+}
+
+export const TotalAttendanceModel =async()=>{
+    const query = `SELECT COUNT(*) as total FROM attendances`; 
+    const [rows] = await pool.query(query);
+    return rows;
 }

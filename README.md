@@ -117,7 +117,7 @@ El servidor estará disponible en: `http://localhost:3000`
 La documentación de la API está definida en formato OpenAPI 3.0 en el archivo `api/swagger.yaml`. Una vez que el servidor esté ejecutándose, puedes acceder a la documentación interactiva de Swagger en:
 
 ```
-http://localhost:3000/api-docs
+http://localhost:4000/api-docs
 ```
 
 La documentación incluye:

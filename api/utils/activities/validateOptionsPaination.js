@@ -6,7 +6,7 @@ export const validateOptions = (page, limit) =>{
                 page=1
             }
             if(!limit){
-                page=10
+                limit=10
             }
             return {
                 validatePage:Number(page),

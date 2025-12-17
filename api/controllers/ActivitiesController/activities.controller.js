@@ -17,7 +17,7 @@ export class ActivitiesController {
                 offset
             }
          try {
-            const actividades = await getActividadModel(options); 
+            const actividades = await getActividadModel(options);  
 
             if (actividades.length === 0) {
                 return erroResponse(res, 404, 'No se encontraron actividades');
