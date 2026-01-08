@@ -47,7 +47,7 @@ export class ActivitiesAttendanceController {
 
         try {
             const response = await getAttendanceModel(options);
-            console.log(response);
+            
             if (response.length === 0) {
                 return erroResponse(res, 404, 'No se encontraron registros de asistencia para esta actividad');
             }

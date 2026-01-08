@@ -1,5 +1,5 @@
 import {pool} from "../../config/db.js"
-import { deshabilitarActividad, habilitarActividad } from "../../utils/activities/estatusManual.js";
+import { deshabilitarActividad, habilitarActividad, calcularStatusPorFechas } from "../../utils/activities/estatusManual.js";
 
 
 
@@ -106,6 +106,8 @@ export class ValitateUpdateActivitiesModel {
     const {actividadId,title,description,startDate,endDate,voaeHours,
     availableSpots,supervisorId,scopes,isDisable}= data;
 
+    console.log(`[putActividadbyidModel] isDisable=${isDisable}, typeof=${typeof isDisable}, data.isDisable=${data.isDisable}`);
+
     const conn = await pool.getConnection();
     try {
     await conn.beginTransaction();
@@ -125,8 +127,13 @@ availableSpots,supervisorId,actividadId]);
         await conn.execute(queryActividad_scope,[actividadId,scope]);
     }
 
-    await deshabilitarActividad(isDisable, actividadId, conn);
-    await habilitarActividad(isDisable, actividadId, conn);
+    // Procesar deshabilitar si isDisable === 1
+    if (isDisable === 1) {
+        await deshabilitarActividad(isDisable, actividadId, conn);
+    } else {
+        // Si no se deshabilita (isDisable !== 1), siempre recalcular status por cambio de fechas
+        await calcularStatusPorFechas(actividadId, conn);
+    }
 
     conn.commit();
     return data;
@@ -212,4 +219,15 @@ export class ValidateDeleteActivitiesModel {
         where id =?`
         await pool.query(query,[id]);
     }
+}
+
+
+export const updatestatusActivity =async(data)=>{
+    const {actividadId,status}= data;
+    const query = `update activities
+        set status=?
+        where id=?`; 
+
+    const [rows] = await pool.query(query,[status,actividadId]);
+    return rows;
 }

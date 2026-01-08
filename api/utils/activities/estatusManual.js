@@ -7,7 +7,7 @@ export const deshabilitarActividad = async (isDisable, actividadId, connection =
     }
     
     try{
-        const queryDeshabilitar = `update activities SET status='disabled' WHERE id=? AND isDeleted='false'`;
+        const queryDeshabilitar = `update activities SET isDisabled='true' WHERE id=? AND isDeleted='false'`;
         const [rows]= await conn.execute(queryDeshabilitar, [actividadId]);
         return rows
     }catch(error){
@@ -20,7 +20,10 @@ export const habilitarActividad = async (isDisable, actividadId, connection = nu
     if (isDisable !== 0) { 
         return; 
     }
-    await calcularStatusPorFechas(actividadId, connection);
+    const conn = connection || pool;
+
+    await conn.execute(`update activities SET isDisabled='false' WHERE id=? AND isDeleted='false'`, [actividadId]);
+    await calcularStatusPorFechas(actividadId, conn);
 };
 
 export const calcularStatusPorFechas = async (actividadId, connection = null) => {
@@ -30,14 +33,18 @@ export const calcularStatusPorFechas = async (actividadId, connection = null) =>
     
     if (rows.length === 0) return;
     
-    const { startDate } = rows[0];
+    const { startDate, endDate } = rows[0];
     const ahora = new Date();
     let nuevoStatus;
+
+    // pending si la actividad aun no inicia, inProgress si esta en curso, finished si ya termino
     if (ahora < new Date(startDate)) {
         nuevoStatus = 'pending';
+    } else if (endDate && ahora > new Date(endDate)) {
+        nuevoStatus = 'finished';
     } else {
         nuevoStatus = 'inProgress';
-    } 
+    }
 
     const queryUpdate = `update activities SET status=? where id=?`;
     

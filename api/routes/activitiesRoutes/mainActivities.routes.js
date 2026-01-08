@@ -20,6 +20,7 @@ mainActivitiesRouter.put('/:id', verifyToken,isAdmin,ActivitiesController.putAct
 
 mainActivitiesRouter.put('/disableEneable/:id', verifyToken,isAdmin,ActivitiesController.putActivityDisableEneable);
 mainActivitiesRouter.get('/disableEneable/:id',verifyToken,isAdmin,ActivitiesController.getActivityDisableEneable);
+mainActivitiesRouter.put('/:id/status',verifyToken,isAdmin,ActivitiesController.handleStatusActivitiesManual);
 
 mainActivitiesRouter.delete('/:id',verifyToken,isAdmin,ActivitiesController.deleteActivityByIdController);
 

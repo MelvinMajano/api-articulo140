@@ -57,3 +57,14 @@ const activitiesSchemaDisableEnable = zod.object({
 export const validateActividadDisableEneable = async(data)=>{
     return activitiesSchemaDisableEnable.safeParse(data);
 }
+
+
+const activitiesStatus = zod.object({
+    "actividadId":zod.uuidv4(),
+    "status": zod.number().int(),
+}).strict();
+
+
+export const validateactivitiesStatus = async(data)=>{
+    return activitiesStatus.safeParse(data);
+}

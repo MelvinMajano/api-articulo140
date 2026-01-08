@@ -1,5 +1,5 @@
-import { getActividadbyIdModel, getActividadModel,getActivitiesForSupervisorModel, confirmSupervisor, ValidateCreateActivitiesModel, ValitateUpdateActivitiesModel, ValidateDeleteActivitiesModel, ValitateActivitiesDisableEnableModel, TotalActividadModel } from "../../models/activitiesModel/activities.model.js";
-import { validateActividad, validateActividadDisableEneable, validateActividadput } from "../../schemas/ActivitiesSchema/activitiesSchema.js";
+import { getActividadbyIdModel, getActividadModel,getActivitiesForSupervisorModel, confirmSupervisor, ValidateCreateActivitiesModel, ValitateUpdateActivitiesModel, ValidateDeleteActivitiesModel, ValitateActivitiesDisableEnableModel, TotalActividadModel, updatestatusActivity } from "../../models/activitiesModel/activities.model.js";
+import { validateActividad, validateActividadDisableEneable, validateActividadput, validateactivitiesStatus } from "../../schemas/ActivitiesSchema/activitiesSchema.js";
 import { v4 as uuidv4 } from "uuid";
 import { successResponse, erroResponse } from "../../utils/responseHandler.js";
 import {formatDateHonduras} from "../../utils/activities/formatDateHonduras.js";
@@ -244,4 +244,26 @@ export class ActivitiesController {
         }
     }
 
+    static handleStatusActivitiesManual = async (req,res)=>{
+        const { status } = req.query;
+        const { id } = req.params;
+
+        const data = {
+            actividadId: id,
+            status: Number(status),
+        };
+
+        const { success, error, data: safedata } = await validateactivitiesStatus(data);
+        
+        if(!success){
+            return erroResponse(res, 400, 'Error al validar la data', error);
+        }
+
+        try {
+            await updatestatusActivity(safedata);
+            return successResponse(res, 200, 'Estado acturalizado exitosamente');
+        } catch (error) {
+            return erroResponse(res, 500, 'Hubo un problema al actualizar el estado', error);
+        }
+    }
 }
