@@ -219,8 +219,14 @@ export class ValidateDeleteActivitiesModel {
         where id =?`
         await pool.query(query,[id]);
     }
-}
 
+    static restoreActivitiesModel =async(id)=>{
+        const query = `update activities 
+        set isDeleted ='false'
+        where id =?`
+        await pool.query(query,[id]);
+    }
+}
 
 export const updatestatusActivity =async(data)=>{
     const {actividadId,status}= data;

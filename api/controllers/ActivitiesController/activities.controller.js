@@ -244,6 +244,25 @@ export class ActivitiesController {
         }
     }
 
+    static restoreDeletedActivityController = async (req,res) => {
+        const {id} = req.params;
+
+        try {
+            const activity = await ValidateDeleteActivitiesModel.getDeletedActivitiesModel();
+
+            const activityToRestore = activity.find(act => act.id === id);
+
+            if (!activityToRestore) {
+                return erroResponse(res, 404, 'Actividad a restaurar no encontrada');
+            }
+
+            await ValidateDeleteActivitiesModel.restoreActivitiesModel(id);
+            return successResponse(res, 200, 'Actividad restaurada exitosamente');
+        } catch (error) {
+            return erroResponse(res, 500, 'Hubo un problema al restaurar la actividad', error);
+        }
+    }
+
     static handleStatusActivitiesManual = async (req,res)=>{
         const { status } = req.query;
         const { id } = req.params;

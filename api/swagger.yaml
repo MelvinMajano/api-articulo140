@@ -927,7 +927,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-    
+
+  /api/activities/restore/{id}:
+    put:
+      tags:
+        - Actividades
+      summary: Restaurar actividad eliminada
+      description: Restaurar una actividad que ha sido eliminada (soft delete)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID de la actividad eliminada
+      responses:
+        '200':
+          description: Actividad restaurada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '403':
+          description: Acceso denegado - Solo administradores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Actividad a Restaurar no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'  
                 
   /api/activities/{id}:
     get:

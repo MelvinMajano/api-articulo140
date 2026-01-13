@@ -23,5 +23,6 @@ mainActivitiesRouter.get('/disableEneable/:id',verifyToken,isAdmin,ActivitiesCon
 mainActivitiesRouter.put('/:id/status',verifyToken,isAdmin,ActivitiesController.handleStatusActivitiesManual);
 
 mainActivitiesRouter.delete('/:id',verifyToken,isAdmin,ActivitiesController.deleteActivityByIdController);
+mainActivitiesRouter.put('/restore/:id',verifyToken,isAdmin,ActivitiesController.restoreDeletedActivityController);
 
 export default mainActivitiesRouter;
