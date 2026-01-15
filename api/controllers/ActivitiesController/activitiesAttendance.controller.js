@@ -79,7 +79,18 @@ export class ActivitiesAttendanceController {
     }
 
 
-    static importFile = ()=>{
-        
+    static importFile = async(req,res)=>{
+        const {activityId} = req.params
+
+        if(!req.file || !req.file.buffer){
+            return erroResponse(res,400, "archivo no enviado o vacio")
+        }
+
+        try{
+            const result= await processImportFile(req.file.buffer,activityId,{allowFinishedImport: true});
+            return successResponse(res, 200, "Importacion completada", result);
+        }catch(error){
+            return erroResponse(res, 500, "Hubo un problema al importar el archivo", error.message || error);
+        }
     };
 }
