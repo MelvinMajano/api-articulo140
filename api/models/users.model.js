@@ -21,29 +21,28 @@ export const VOAEHours = async (id) => {
    const query = `
 SELECT 
     u.name AS studentName,
-    SUM(CASE WHEN s.scope = 'cultural' THEN COALESCE(at.hoursAwarded, 0) ELSE 0 END) AS culturalHours,
-    SUM(CASE WHEN s.scope = 'cientificoAcademico' THEN COALESCE(at.hoursAwarded, 0) ELSE 0 END) AS cientificoAcademicoHours,
-    SUM(CASE WHEN s.scope = 'deportivo' THEN COALESCE(at.hoursAwarded, 0) ELSE 0 END) AS deportivoHours,
-    SUM(CASE WHEN s.scope = 'social' THEN COALESCE(at.hoursAwarded, 0) ELSE 0 END) AS socialHours,
-    SUM(COALESCE(at.hoursAwarded, 0)) AS totalHours
-FROM attendances at
-INNER JOIN registrations r
-    ON at.studentId = r.studentId 
-    AND at.activityId = r.activityId
-INNER JOIN activities a 
-    ON r.activityId = a.id
-INNER JOIN users u
-    ON r.studentId = u.id
-INNER JOIN activityScopes s
+    COALESCE(SUM(CASE WHEN s.scope = 'cultural' THEN at.hoursAwarded ELSE 0 END), 0) AS culturalHours,
+    COALESCE(SUM(CASE WHEN s.scope = 'cientificoAcademico' THEN at.hoursAwarded ELSE 0 END), 0) AS cientificoAcademicoHours,
+    COALESCE(SUM(CASE WHEN s.scope = 'deportivo' THEN at.hoursAwarded ELSE 0 END), 0) AS deportivoHours,
+    COALESCE(SUM(CASE WHEN s.scope = 'social' THEN at.hoursAwarded ELSE 0 END), 0) AS socialHours,
+    COALESCE(SUM(at.hoursAwarded), 0) AS totalHours
+FROM users u
+LEFT JOIN registrations r 
+    ON u.id = r.studentId
+LEFT JOIN attendances at
+    ON r.studentId = at.studentId 
+    AND r.activityId = at.activityId
+LEFT JOIN activities a 
+    ON r.activityId = a.id 
+    AND a.status = 'finished'
+LEFT JOIN activityScopes s
     ON a.id = s.activityId
-WHERE a.status = 'finished'
-  AND (
-       u.id = ? 
-       OR u.accountNumber = ? 
-       OR u.identityNumber = ?
-  )
-GROUP BY u.name
-ORDER BY u.name;
+    WHERE 
+        u.id = ?
+        OR u.accountNumber = ?
+        OR u.identityNumber = ?
+    GROUP BY u.id, u.name
+    ORDER BY u.name;
 `;
    const [result] = await pool.query(query, [id, id, id]);
    return result;

@@ -60,10 +60,15 @@ export default class UserController{
         const result  = await VOAEHours(id)
         
         if(result.length===0){
-             return successResponse(res,200,"No ha Adquirido Horas VOAE")
+             return successResponse(res,200,"No ha Adquirido Horas VOAE", [{
+                studentName: result.studentName || 'Estudiante',
+                culturalHours: 0,
+                deportivoHours: 0,
+                cientificoAcademicoHours: 0,
+                socialHours: 0,
+                totalHours: 0
+             }])
         }
-        
-        
         
         if(result){
             return successResponse(res,200,"Horas VOAE Adquiridas:",result)
