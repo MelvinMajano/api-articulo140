@@ -77,4 +77,9 @@ export class ActivitiesAttendanceController {
             return erroResponse(res, 500, 'Hubo un problema al obtener la asistencia', error);
         }
     }
+
+
+    static importFile = ()=>{
+        
+    };
 }
