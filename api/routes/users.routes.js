@@ -12,6 +12,6 @@ UserRouter.get("/supervisors",verifyToken,isAdmin,UserController.getSupervisors)
 UserRouter.put("/supervisor/:accountNumber/disable",verifyToken,isAdmin, UserController.disableSupervisor)
 UserRouter.put("/supervisor/:accountNumber/enable",verifyToken,isAdmin, UserController.enableSupervisor)
 UserRouter.get("/careers",verifyToken,isAdmin,UserController.getCareers)
-UserRouter.post("/:id/registerActivity", verifyToken,isAdmin, UserController.registerActivityForStudent);
+UserRouter.post("/:id/registerActivity/:activityId", verifyToken,isAdmin, UserController.registerActivityForStudent);
 
 export default UserRouter

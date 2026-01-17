@@ -3,7 +3,6 @@ import { userExist } from "../models/auth.model.js"
 import { CurrentActivitiesDB, VOAEHours, getStudentsModel,getSupervisorsModel,disableSupervisorModel,enableSupervisorModel,getCareersModel,registerActivityForStudentModel } from "../models/users.model.js"
 import { validateActivityForUser } from "../schemas/ActivitiesSchema/activitiesSchema.js"
 import { validateResult, validateUserDb } from "../utils/validations.js"
-import { v4 as uuidv4 } from "uuid";
 import { successResponse,erroResponse } from "../utils/responseHandler.js"
 
 
@@ -173,34 +172,35 @@ export default class UserController{
     }
 
     static registerActivityForStudent = async (req, res) => {
-        const { id } = req.params;
-        const data = req.body
+      const { id, activityId } = req.params
 
-        try {
+      try {
+        const Exist = await userExist(id)
+        if (validateUserDb(Exist, res)) return
 
-            const Exist = await userExist(id)
-            if(validateUserDb(Exist,res))return
+        const response = await registerActivityForStudentModel(activityId, id)
 
-            const {success,error,data: filteredData} = await validateActivityForUser(data)
-
-            if(!success) {
-                return erroResponse(res,400,"Error en los datos",error)
-            }
-
-            filteredData.id = uuidv4();
-            filteredData.status = "finished"
-            filteredData.availableSpots = 0
-
-            const response = await registerActivityForStudentModel(filteredData,id)
-
-            return successResponse(res,201,"Actividad registrada con éxito",response)
-
-            
-
-        } catch (error) {
-            return erroResponse(res,500,"Error al registrar actividad",error)
+        if (response.isDuplicate) {
+          return res.status(409).json({
+            success: false,
+            isDuplicate: true,
+            message: response.message
+          })
         }
-    };
+
+        return res.status(201).json({
+          success: true,
+          message: "Actividad registrada con éxito",
+          data: response
+        })
+
+      } catch (error) {
+        return res.status(500).json({
+          success: false,
+          message: "Error al registrar actividad"
+        })
+      }
+    }
 }
 
 
