@@ -4,6 +4,7 @@ import { registerAttendanceModel, getAttendanceModel, TotalAttendanceModel} from
 import { formatDateHonduras } from "../../utils/activities/formatDateHonduras.js";
 import { successResponse, erroResponse } from "../../utils/responseHandler.js";
 import { validateOptions } from "../../utils/activities/validateOptionsPaination.js";
+import { processImportFile } from "../../services/activitiesImport.service.js";
 
 export class ActivitiesAttendanceController {
 

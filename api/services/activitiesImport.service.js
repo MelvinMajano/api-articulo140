@@ -1,8 +1,8 @@
 import XLSX from "xlsx";
 import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
-import { prisma } from "../config/prisma";
-import { validateExcelRows } from "../schemas/ActivitiesSchema/excelImportSchema";
+import { prisma } from "../config/prisma.js";
+import { validateExcelRows } from "../schemas/ActivitiesSchema/excelImportSchema.js";
 
 const DEFAULT_DEGREE_ID = 1;
 const toUnique = (arr) => [...new Set(arr.filter(Boolean))];
@@ -25,6 +25,7 @@ const parseBuffer = (buffer) => {
         throw new Error(`Error al leer el archivo Excel: ${error.message}`);
     }
 };
+
 const sanitizeRows = (rows) => rows.map((row) => ({
     ...row,
     accountNumber: row.accountNumber != null ? String(row.accountNumber).trim() : row.accountNumber,
@@ -33,7 +34,7 @@ const sanitizeRows = (rows) => rows.map((row) => ({
     identityNumber: row.identityNumber != null ? String(row.identityNumber).trim() : row.identityNumber,
     degreeCode: row.degreeCode != null ? String(row.degreeCode).trim() : row.degreeCode,
     observations: row.observations != null ? String(row.observations).trim() : row.observations,
-  }));
+}));
 
 export const processImportFile = async (buffer, activityId, { allowFinishedImport = false } = {}) => {
     const parsedRows = sanitizeRows(parseBuffer(buffer));
@@ -48,27 +49,26 @@ export const processImportFile = async (buffer, activityId, { allowFinishedImpor
 
     try {
         const result = await prisma.$transaction(async (tx) => {
-            const [existingUsers, degrees, activity] = await Promise.all(
-                [
-                    tx.users.findMany({
-                        where: { accountNumber: { in: accountNumbers } },
-                        select: { id: true, accountNumber: true }
-                    }),
-                    tx.degrees.findMany({
-                        where: { code: { in: degreeCodes } },
-                        select: { id: true, code: true }
-                    }),
-                    tx.activities.findUnique({
-                        where: { id: activityId },
-                        select: { id: true, status: true, availableSpots: true }
-                    })
-                ]
-            )
+            // Obtener datos existentes
+            const [existingUsers, degrees, activity] = await Promise.all([
+                tx.users.findMany({
+                    where: { accountNumber: { in: accountNumbers } },
+                    select: { id: true, accountNumber: true, email: true, identityNumber: true }
+                }),
+                degreeCodes.length > 0 ? tx.degrees.findMany({
+                    where: { code: { in: degreeCodes } },
+                    select: { id: true, code: true }
+                }) : Promise.resolve([]),
+                tx.activities.findUnique({
+                    where: { id: activityId },
+                    select: { id: true, status: true, availableSpots: true }
+                })
+            ]);
 
             if (!activity) {
                 return {
                     created: 0, existing: 0, registered: 0, attendanceSaved: 0,
-                    errors: [{ row: null, message: "actividad no encontrada" }]
+                    errors: [{ row: null, message: "Actividad no encontrada" }]
                 };
             }
 
@@ -88,11 +88,27 @@ export const processImportFile = async (buffer, activityId, { allowFinishedImpor
             const rowsToCreate = [];
             const preCreateErrors = [];
 
+            // Recopilar emails e identidades existentes en la BD
+            const existingEmails = new Set(existingUsers.map(u => u.email || ''));
+            const existingIdentities = new Set(existingUsers.map(u => u.identityNumber || '').filter(Boolean));
+
             for (const row of newRows) {
+                // Validar contra emails ya en BD
+                if (existingEmails.has(row.email)) {
+                    preCreateErrors.push(buildRowError(row.rowNumber, "Email ya existe en el sistema"));
+                    continue;
+                }
+                // Validar contra emails dentro del archivo
                 if (seenEmails.has(row.email)) {
                     preCreateErrors.push(buildRowError(row.rowNumber, "Email duplicado en el archivo"));
                     continue;
                 }
+                // Validar contra identidades ya en BD
+                if (row.identityNumber && existingIdentities.has(row.identityNumber)) {
+                    preCreateErrors.push(buildRowError(row.rowNumber, "Cédula ya existe en el sistema"));
+                    continue;
+                }
+                // Validar contra identidades dentro del archivo
                 if (row.identityNumber && seenIdentities.has(row.identityNumber)) {
                     preCreateErrors.push(buildRowError(row.rowNumber, "Cédula duplicada en el archivo"));
                     continue;
@@ -104,6 +120,7 @@ export const processImportFile = async (buffer, activityId, { allowFinishedImpor
 
             let createdCount = 0;
             const createdMap = new Map();
+
             if (rowsToCreate.length > 0) {
                 const usersToCreate = rowsToCreate.map(row => {
                     const id = uuidv4();
@@ -117,9 +134,10 @@ export const processImportFile = async (buffer, activityId, { allowFinishedImpor
                         identityNumber: row.identityNumber || null,
                         role: 'student',
                         degreeId: degreeMap.get(row.degreeCode) || DEFAULT_DEGREE_ID,
-                        isDeleted: false,
-                    }
+                        isDeleted: 'false'
+                    };
                 });
+
                 const createResult = await tx.users.createMany({
                     data: usersToCreate
                 });
@@ -127,12 +145,14 @@ export const processImportFile = async (buffer, activityId, { allowFinishedImpor
             }
 
             const studentMap = new Map([...existingMap, ...createdMap]);
-            const allStudentIds = accountNumbers.map(acc => studentMap.get(acc)).filter(Boolean);
+            const allStudentIds = accountNumbers
+                .map(acc => studentMap.get(acc))
+                .filter(Boolean);
 
             const existingRegistrations = await tx.registrations.findMany({
                 where: { activityId, studentId: { in: allStudentIds } },
                 select: { studentId: true }
-            })
+            });
 
             const alreadyRegisteredSet = new Set(existingRegistrations.map(r => r.studentId));
             const toRegister = allStudentIds.filter(id => !alreadyRegisteredSet.has(id));
@@ -140,32 +160,33 @@ export const processImportFile = async (buffer, activityId, { allowFinishedImpor
             let registeredIds = [...alreadyRegisteredSet];
             const skipped = [];
 
-            let allowedCount = 0;
             if (toRegister.length > 0) {
-                allowedCount = allowFinishedImport ? toRegister.length : Math.min(Number(activity.availableSpots) || 0, toRegister.length);
-            }
+                const allowedCount = allowFinishedImport
+                    ? toRegister.length
+                    : Math.min(Number(activity.availableSpots) || 0, toRegister.length);
 
-            if (allowedCount > 0) {
-                await tx.registrations.createMany({
-                    data: toRegister.slice(0, allowedCount).map(id => ({
-                        studentId: id,
-                        activityId
-                    })),
-                    skipDuplicates: true
-                });
+                if (allowedCount > 0) {
+                    await tx.registrations.createMany({
+                        data: toRegister.slice(0, allowedCount).map(id => ({
+                            studentId: id,
+                            activityId
+                        })),
+                        skipDuplicates: true
+                    });
 
-                registeredIds.push(...toRegister.slice(0, allowedCount));
-            }
+                    registeredIds.push(...toRegister.slice(0, allowedCount));
 
-            if (!allowFinishedImport) {
-                await tx.activities.update({
-                    where: { id: activityId },
-                    data: { availableSpots: { decrement: allowedCount } }
-                })
-            }
+                    if (!allowFinishedImport) {
+                        await tx.activities.update({
+                            where: { id: activityId },
+                            data: { availableSpots: { decrement: allowedCount } }
+                        });
+                    }
+                }
 
-            if (!allowFinishedImport && allowedCount < toRegister.length) {
-                skipped.push(...toRegister.slice(allowedCount));
+                if (!allowFinishedImport && allowedCount < toRegister.length) {
+                    skipped.push(...toRegister.slice(allowedCount));
+                }
             }
 
             const registeredSet = new Set(registeredIds);
@@ -174,11 +195,12 @@ export const processImportFile = async (buffer, activityId, { allowFinishedImpor
 
             for (const row of validRows) {
                 const studentId = studentMap.get(row.accountNumber);
+                
                 if (!studentId) {
                     attendanceErrors.push(buildRowError(row.rowNumber, "No se pudo obtener el estudiante"));
                     continue;
                 }
-
+                
                 if (!registeredSet.has(studentId)) {
                     attendanceErrors.push(buildRowError(row.rowNumber, "Estudiante no inscrito (sin cupos o actividad cerrada)"));
                     continue;
@@ -231,4 +253,4 @@ export const processImportFile = async (buffer, activityId, { allowFinishedImpor
         }
         throw error;
     }
-}
+};
