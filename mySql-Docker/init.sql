@@ -116,6 +116,9 @@ ALTER TABLE attendances
 ADD CONSTRAINT pk_attendances PRIMARY KEY (id);
 
 ALTER TABLE attendances
+ADD CONSTRAINT uq_attendances_student_activity UNIQUE (studentId, activityId);
+
+ALTER TABLE attendances
 ADD CONSTRAINT fk_attendances_registration FOREIGN KEY (studentId, activityId) REFERENCES registrations(studentId, activityId);
 
 CREATE TABLE files (
