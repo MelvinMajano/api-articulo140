@@ -1,12 +1,13 @@
 import XLSX from "xlsx";
 import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
-import { prisma } from "../config/prisma.js";
+import { PrismaClient } from "@prisma/client";
 import { validateExcelRows } from "../schemas/ActivitiesSchema/excelImportSchema.js";
 
 const DEFAULT_DEGREE_ID = 1;
 const toUnique = (arr) => [...new Set(arr.filter(Boolean))];
 const buildRowError = (rowNumber, message) => ({ row: rowNumber, message });
+const prisma = new PrismaClient();
 
 const parseBuffer = (buffer) => { 
     try{
