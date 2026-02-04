@@ -10,4 +10,6 @@ activitiesAttendanceRouter.post('/',verifyToken,isSupervisor,ActivitiesAttendanc
 
 activitiesAttendanceRouter.get('/:activityid',verifyToken,isAdmin,ActivitiesAttendanceController.viewAttendancebyId);
 
+activitiesAttendanceRouter.put('/:attendanceId/hours',verifyToken,isAdmin,ActivitiesAttendanceController.updateHoursAwarded);
+
 export default activitiesAttendanceRouter;

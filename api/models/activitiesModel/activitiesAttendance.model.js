@@ -32,7 +32,7 @@ export const getAttendanceModel = async (options) => {
   
   try{
 
-    const query = `select u.accountNumber, u.name, a.entryTime, a.exitTime , a.hoursAwarded, group_concat(ac.scope) as Scope 
+    const query = `select a.id as attendanceId, u.accountNumber, u.name, a.entryTime, a.exitTime , a.hoursAwarded, group_concat(ac.scope) as Scope 
                    from attendances as a
                    inner join users as u on u.id = a.studentId
                    inner join activityScopes as ac on ac.activityId = a.activityId
@@ -54,4 +54,23 @@ export const TotalAttendanceModel =async()=>{
     const query = `SELECT COUNT(*) as total FROM attendances`; 
     const [rows] = await pool.query(query);
     return rows;
+}
+
+export const updateHoursAwardedModel = async (attendanceId, hoursAwarded) =>{
+    const query =`UPDATE attendances 
+      SET hoursAwarded = ? 
+      WHERE id = ?`;
+    const [rows] = await pool.query(query,[hoursAwarded, attendanceId]);
+    return rows;
+};
+
+export const getAttendanceByIdModel = async (attendanceId) => {
+  const query = `
+      SELECT a.*, u.name, u.accountNumber 
+      FROM attendances as a
+      INNER JOIN users as u ON u.id = a.studentId
+      WHERE a.id = ?
+    `;
+    const [rows] = await pool.query(query,[attendanceId]);
+    return rows[0];
 }

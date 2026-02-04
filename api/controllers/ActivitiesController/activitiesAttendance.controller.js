@@ -1,10 +1,12 @@
 import { validateAttendances } from "../../schemas/ActivitiesSchema/activitiesAttendanceSchema.js";
 import { v4 as uuidv4 } from "uuid";
-import { registerAttendanceModel, getAttendanceModel, TotalAttendanceModel} from "../../models/activitiesModel/activitiesAttendance.model.js";
+import { registerAttendanceModel, getAttendanceModel, TotalAttendanceModel, getAttendanceByIdModel, updateHoursAwardedModel } from "../../models/activitiesModel/activitiesAttendance.model.js";
 import { formatDateHonduras } from "../../utils/activities/formatDateHonduras.js";
 import { successResponse, erroResponse } from "../../utils/responseHandler.js";
 import { validateOptions } from "../../utils/activities/validateOptionsPaination.js";
 import { processImportFile } from "../../services/activitiesImport.service.js";
+import { validateAttendanceId, validateHoursAwarded } from "../../schemas/ActivitiesSchema/hoursAwardedSchema.js";
+import { tr } from "zod/v4/locales";
 
 export class ActivitiesAttendanceController {
 
@@ -13,17 +15,17 @@ export class ActivitiesAttendanceController {
 
         const parsed = await validateAttendances(data);
 
-        if(!parsed.success){
+        if (!parsed.success) {
             return erroResponse(res, 400, 'Hubo un error al validar la data', parsed.error.format());
         }
 
         const safeData = parsed.data.attendances.map(attendance => ({
-              id: uuidv4(),
-              ...attendance
+            id: uuidv4(),
+            ...attendance
         }));
 
         try {
-            
+
             await registerAttendanceModel(safeData);
 
             return successResponse(res, 200, 'Asistencias registradas con éxito');
@@ -33,10 +35,10 @@ export class ActivitiesAttendanceController {
         }
     }
 
-    static viewAttendancebyId = async (req,res) => {
-        const {page,limit} = req.query;
-        const {validatePage,validateLimit} = validateOptions(page,limit)
-        const {activityid} = req.params 
+    static viewAttendancebyId = async (req, res) => {
+        const { page, limit } = req.query;
+        const { validatePage, validateLimit } = validateOptions(page, limit)
+        const { activityid } = req.params
 
         const offset = (validatePage - 1) * validateLimit;
         const options = {
@@ -48,7 +50,7 @@ export class ActivitiesAttendanceController {
 
         try {
             const response = await getAttendanceModel(options);
-            
+
             if (response.length === 0) {
                 return erroResponse(res, 404, 'No se encontraron registros de asistencia para esta actividad');
             }
@@ -63,12 +65,12 @@ export class ActivitiesAttendanceController {
             const total = countResult[0].total;
 
             const result = {
-                data:formattedsAttendances,
-                pagination:{
+                data: formattedsAttendances,
+                pagination: {
                     total,
                     page,
                     limit,
-                    totalPage:Math.ceil(total/limit)
+                    totalPage: Math.ceil(total / limit)
                 }
             }
 
@@ -80,18 +82,60 @@ export class ActivitiesAttendanceController {
     }
 
 
-    static importFile = async(req,res)=>{
-        const {activityId} = req.params
+    static importFile = async (req, res) => {
+        const { activityId } = req.params
 
-        if(!req.file || !req.file.buffer){
-            return erroResponse(res,400, "archivo no enviado o vacio")
+        if (!req.file || !req.file.buffer) {
+            return erroResponse(res, 400, "archivo no enviado o vacio")
         }
 
-        try{
-            const result= await processImportFile(req.file.buffer,activityId,{allowFinishedImport: true});
+        try {
+            const result = await processImportFile(req.file.buffer, activityId, { allowFinishedImport: true });
             return successResponse(res, 200, "Importacion completada", result);
-        }catch(error){
+        } catch (error) {
             return erroResponse(res, 500, "Hubo un problema al importar el archivo", error.message || error);
         }
     };
+
+    static updateHoursAwarded = async (req, res) => {
+        const { attendanceId } = req.params;
+        const { hoursAwarded } = req.body;
+
+        const paramValidation = validateAttendanceId({ attendanceId });
+
+        if (!paramValidation.success) {
+            return erroResponse(res, 400, 'ID de asistencia inválido', paramValidation.error.format());
+        }
+
+        const bodyValidation = validateHoursAwarded({ hoursAwarded });
+
+        if (!bodyValidation.success) {
+            return erroResponse(res, 400, 'Datos de horas inválidos', bodyValidation.error.format());
+        }
+
+        try {
+            const attendance = await getAttendanceByIdModel(attendanceId);
+
+            if (!attendance) {
+                return erroResponse(res, 404, 'Registro de asistencia no encontrado');
+            }
+
+            const result = await updateHoursAwardedModel(attendanceId, bodyValidation.data.hoursAwarded);
+
+            if (result.affectedRows === 0) {
+                throw new Error('No se encontró el registro de asistencia');
+            }
+
+            return successResponse(res, 200, 'Horas otorgadas actualizadas con éxito', {
+                attendanceId,
+                studentName: attendance.name,
+                accountNumber: attendance.accountNumber,
+                hoursAwarded: bodyValidation.data.hoursAwarded,
+                updatedAt: new Date()
+            });
+
+        } catch (error) {
+            return erroResponse(res, 500, 'Hubo un problema al actualizar las horas otorgadas', error.message);
+        }
+    }
 }
