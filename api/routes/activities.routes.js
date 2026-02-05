@@ -7,10 +7,10 @@ import activitiesFilesRouter from "./activitiesRoutes/activitiesfiles.routes.js"
 import activitiesImportRouter from "./activitiesRoutes/activitiesImport.routes.js";
 
 const activitiesRouter = Router();
-activitiesRouter.use('/', mainActivitiesRouter);
 activitiesRouter.use('/degrees', activitiesDegreesRouter);
 activitiesRouter.use('/attendance', activitiesAttendanceRouter);
 activitiesRouter.use('/import-file', activitiesImportRouter);
+activitiesRouter.use('/', mainActivitiesRouter);
 activitiesRouter.use('/', activitiesInscriptionsRouter);
 activitiesRouter.use('/', activitiesFilesRouter);
 

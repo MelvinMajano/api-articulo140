@@ -66,8 +66,19 @@ export const deleteDegreeModel = async (id) => {
 
     const cnn = await pool.getConnection();
 
-    const query = "delete from degrees where id = ?";
+    const query = "update degrees set isDisabled = 1 where id = ?";
 
+    try {
+        await cnn.execute(query, [id]);
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const restoreDegreeModel = async (id) => {
+    const cnn = await pool.getConnection();
+
+    const query = "update degrees set isDisabled = 2 where id = ?";
     try {
         await cnn.execute(query, [id]);
     } catch (error) {

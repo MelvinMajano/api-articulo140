@@ -1,5 +1,5 @@
 import { validateDegree } from "../../schemas/ActivitiesSchema/activitiesDegreesSchema.js";
-import { createDegreeModel, getDegreesModel, updateDegreeModel, deleteDegreeModel, degreeExistsModel, hasConflictDegreeModel } from "../../models/activitiesModel/activitiesDegrees.model.js";
+import { createDegreeModel, getDegreesModel, updateDegreeModel, deleteDegreeModel, restoreDegreeModel , degreeExistsModel, hasConflictDegreeModel } from "../../models/activitiesModel/activitiesDegrees.model.js";
 import { successResponse, erroResponse } from "../../utils/responseHandler.js";
 
 export class ActivitiesDegreesController {
@@ -25,7 +25,7 @@ export class ActivitiesDegreesController {
     static getDegrees = async (req, res) => {
         try {
             const degrees = await getDegreesModel();
-            return successResponse(res, 200, degrees);
+            return successResponse(res, 200, "Carreras obtenidas con éxito", degrees);
         } catch (error) {
             return erroResponse(res, 500, "Hubo un problema al obtener las carreras", error);
         }
@@ -71,9 +71,27 @@ export class ActivitiesDegreesController {
 
         try {
             await deleteDegreeModel(id);
-            return successResponse(res, 200, "Carrera eliminada con éxito");
+            return successResponse(res, 200, "Carrera deshabilitada con éxito");
         } catch (error) {
-            return erroResponse(res, 500, "Hubo un problema al eliminar la carrera", error);
+            return erroResponse(res, 500, "Hubo un problema al deshabilitar la carrera", error);
         }
+    }
+
+
+    static restoreDegree = async (req,res) => {
+        const {id} = req.params 
+
+        const degreeExist = await degreeExistsModel(id);
+
+        if (degreeExist.length === 0) {
+            return erroResponse(res, 404, "Carrera no encontrada");
+        }
+
+        try {
+            await restoreDegreeModel(id);
+            return successResponse(res, 200, "Carrera restaurada con éxito");
+        } catch (error) {
+            return erroResponse(res, 500, "Hubo un problema al restaurar la carrera", error);
+        }        
     }
 }

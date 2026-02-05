@@ -11,6 +11,8 @@ activitiesDegreesRouter.post('/', verifyToken, isAdmin, ActivitiesDegreesControl
 
 activitiesDegreesRouter.put('/:id',verifyToken,isAdmin, ActivitiesDegreesController.updateDegree);
 
-activitiesDegreesRouter.delete('/:id',verifyToken,isAdmin, ActivitiesDegreesController.deleteDegree);
+activitiesDegreesRouter.put('/disable/:id',verifyToken,isAdmin, ActivitiesDegreesController.deleteDegree);
+
+activitiesDegreesRouter.put('/restore/:id',verifyToken, isAdmin, ActivitiesDegreesController.restoreDegree);
 
 export default activitiesDegreesRouter;
