@@ -7,6 +7,7 @@ import { validateExcelRows } from "../schemas/ActivitiesSchema/excelImportSchema
 const DEFAULT_DEGREE_ID = 1;
 const toUnique = (arr) => [...new Set(arr.filter(Boolean))];
 const buildRowError = (rowNumber, message) => ({ row: rowNumber, message });
+
 const prisma = new PrismaClient();
 
 const parseBuffer = (buffer) => { 
