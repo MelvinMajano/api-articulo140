@@ -51,8 +51,20 @@ export class ActivitiesController {
     }
 
     static getDeletedActivitiesController = async(req,res) => {
+
+        const {page,limit} = req.query;
+        const {validatePage,validateLimit} = validateOptions(page,limit)
+
+        const offset = (validatePage - 1) * validateLimit;
+
+         const options = {
+            validatePage,
+            validateLimit,
+            offset
+        };
+
         try {
-           const deletedActivities = await ValidateDeleteActivitiesModel.getDeletedActivitiesModel();
+           const deletedActivities = await ValidateDeleteActivitiesModel.getDeletedActivitiesModel(options);
 
            if (deletedActivities.length === 0) {
                return erroResponse(res, 404, 'No se encontraron actividades eliminadas');
@@ -64,7 +76,20 @@ export class ActivitiesController {
                   endDate: formatDateHonduras(actividad.endDate),
               }));
 
-              return successResponse(res, 200, "Actividades eliminadas:", formatedDeletedActivities);
+              const countResult = await ValidateDeleteActivitiesModel.totalDeletedActivitiesModel();
+              const total = countResult[0].total;
+
+              const result = {
+                data: formatedDeletedActivities,
+                pagination: {
+                    total,
+                    page,
+                    limit,
+                    totalPage: Math.ceil(total / limit),
+                },
+            };
+
+              return successResponse(res, 200, "Actividades eliminadas:",result);
 
         } catch (error) {
             return erroResponse(res, 500, 'Error al obtener las actividades eliminadas', error);
@@ -247,8 +272,13 @@ export class ActivitiesController {
     static restoreDeletedActivityController = async (req,res) => {
         const {id} = req.params;
 
+        const options = {
+            offset: 0,
+            validateLimit: 1000,
+        }
+
         try {
-            const activity = await ValidateDeleteActivitiesModel.getDeletedActivitiesModel();
+            const activity = await ValidateDeleteActivitiesModel.getDeletedActivitiesModel(options);
 
             const activityToRestore = activity.find(act => act.id === id);
 

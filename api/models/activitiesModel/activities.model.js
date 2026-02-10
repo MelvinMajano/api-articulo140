@@ -187,16 +187,26 @@ export class ValitateActivitiesDisableEnableModel {
 
 export class ValidateDeleteActivitiesModel {
 
-    static getDeletedActivitiesModel = async () => {
+    static getDeletedActivitiesModel = async (options) => {
+
+        const { validateLimit, offset } = options;
+
         const query = `select a.id, a.title, a.description, u.name as supervisor , a.startDate, a.endDate, a.voaeHours, group_concat(ase.scope) as scopes , a.availableSpots from activities as a
                        inner join users as u on u.id = a.supervisorId
                        inner join activityScopes as ase on ase.activityId = a.id 
                        where a.isDeleted = 'true'
-                       group by a.id, a.title, a.description, a.startDate, a.endDate, a.voaeHours, a.availableSpots, u.name`
+                       group by a.id, a.title, a.description, a.startDate, a.endDate, a.voaeHours, a.availableSpots, u.name
+                       limit ? offset ?`;
 
-        const [rows] = await pool.query(query);
+        const [rows] = await pool.query(query,[validateLimit, offset]);
         return rows;
 
+    }
+
+    static totalDeletedActivitiesModel = async () => {
+        const query = `select COUNT(*) as total from activities where isDeleted = 'true'`;
+        const [rows] = await pool.query(query);
+        return rows;
     }
     
     static validateActivitiesModel =async(id)=>{
