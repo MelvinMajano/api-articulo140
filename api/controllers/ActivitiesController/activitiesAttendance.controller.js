@@ -50,19 +50,14 @@ export class ActivitiesAttendanceController {
 
         try {
             const response = await getAttendanceModel(options);
-
-            if (response.length === 0) {
-                return erroResponse(res, 404, 'No se encontraron registros de asistencia para esta actividad');
-            }
+            const countResult = await TotalAttendanceModel(activityid);
+            const total = countResult[0].total;
 
             const formattedsAttendances = response.map(attendance => ({
                 ...attendance,
                 entryTime: formatDateHonduras(attendance.entryTime),
                 exitTime: formatDateHonduras(attendance.exitTime),
             }));
-
-            const countResult = await TotalAttendanceModel();
-            const total = countResult[0].total;
 
             const result = {
                 data: formattedsAttendances,
@@ -90,7 +85,7 @@ export class ActivitiesAttendanceController {
         }
 
         try {
-            const result = await processImportFile(req.file.buffer, activityId, { allowFinishedImport: true });
+            const result = await processImportFile(req.file.buffer, activityId, { allowFinishedImport: false });
             return successResponse(res, 200, "Importacion completada", result);
         } catch (error) {
             return erroResponse(res, 500, "Hubo un problema al importar el archivo", error.message || error);

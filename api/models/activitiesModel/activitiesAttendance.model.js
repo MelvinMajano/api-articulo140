@@ -50,9 +50,9 @@ export const getAttendanceModel = async (options) => {
   }
 }
 
-export const TotalAttendanceModel =async()=>{
-    const query = `SELECT COUNT(*) as total FROM attendances`; 
-    const [rows] = await pool.query(query);
+export const TotalAttendanceModel =async(activityid)=>{
+    const query = `SELECT COUNT(*) as total FROM attendances WHERE activityId = ?`; 
+    const [rows] = await pool.query(query, [activityid]);
     return rows;
 }
 
