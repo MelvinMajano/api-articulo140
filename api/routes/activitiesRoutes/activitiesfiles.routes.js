@@ -13,4 +13,10 @@ activitiesFilesRouter.get('/images/files',verifyToken, isAdmin, ActivitiesFilesC
 
 activitiesFilesRouter.delete('/images/delete',verifyToken, isAdmin, ActivitiesFilesController.deleteFilesController);
 
+activitiesFilesRouter.post('/images/link',verifyToken,isAdmin,ActivitiesFilesController.linkImageToActivityController);
+
+activitiesFilesRouter.get('/images/by-activity/:id',verifyToken,isAdmin,ActivitiesFilesController.getImageByActivityController);
+
+activitiesFilesRouter.put('/images/by-activity/:id',verifyToken,isAdmin,ActivitiesFilesController.updateImageActivityController);
+
 export default activitiesFilesRouter;

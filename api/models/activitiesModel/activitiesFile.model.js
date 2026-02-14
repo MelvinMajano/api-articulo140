@@ -1,14 +1,24 @@
 import {pool} from "../../config/db.js"
 
-export const postActivitiesFilesModel = async(file)=>{
-    const {id,actividad_id,nombre_archivo,url}=file;
-    const query = `insert into archivos(id,actividad_id,nombre_archivo,url) values(?,?,?,?)`
-
-    await pool.query(query,[id,actividad_id,nombre_archivo,url]);
+export const postActivitiesFilesModel = async(fileData)=>{
+    const { id, activityId, fileName, url } = fileData
+    
+    const query = `
+    INSERT INTO files (id, activityId, fileName, url)
+    VALUES (?, ?, ?, ?)
+    ON DUPLICATE KEY UPDATE
+      activityId = VALUES(activityId),
+      fileName = VALUES(fileName),
+      url = VALUES(url),
+      updatedAt = CURRENT_TIMESTAMP
+  `
+    const [result] = await pool.query(query, [id, activityId, fileName, url])
+    return result
 }
 
-export const getActivitiesFilesModel = async(id)=>{
-    const query = `select *from archivos where actividad_id = ?`;
-    const [rows] = await pool.query(query,[id])
-    return rows[0];
-}
+export const getActivitiesFilesModel = async(activityId)=>{
+    const query = `SELECT * FROM files WHERE activityId = ? LIMIT 1`
+    
+    const [rows] = await pool.query(query, [activityId])
+    return rows.length > 0 ? rows[0] : null
+} 
