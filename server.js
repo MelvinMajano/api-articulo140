@@ -36,10 +36,22 @@ app.use(cors({
 
 }))
 
+const start = Date.now()
+app.use((req, res, next) => {
+  res.on('finish', () => {
+    const duration = Date.now() - start
+    if (duration > 1000) {
+      console.log(` Tiempo de respuesta lenta: ${req.method} ${req.url} - ${duration}ms`)
+    }
+  })
+  next()
+});
+
 app.use('/api/activities',activitiesRouter)
 app.use("/api/auth",AuthRouter)
 app.use("/api/users",UserRouter)
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 
 app.use((req,res)=>{
     res.status(404).json({message:`${req.url} no fue encontrada`})

@@ -51,69 +51,44 @@ LEFT JOIN activityScopes s
 
 
 export const getStudentsModel = async () => {
-
-    const cnn = await pool.getConnection()
-
     const query = `select u.id,u.name, u.email, u.accountNumber, u.identityNumber, d.name as career from users as u 
    inner join degrees as d on u.degreeId = d.id
    where u.role = 'student' and u.isDeleted = 'false'`
-
-    const [result] = await cnn.query(query)
-
+    const [result] = await pool.query(query)
     return result
 }
 
 export const getSupervisorsModel = async (options) => {
-
     const {validateLimit,offset} = options;
-    const cnn = await pool.getConnection()
-
     const query = `select u.id, u.name, u.email, u.accountNumber, u.identityNumber, d.name as career, u.isDeleted from users as u
    inner join degrees as d on u.degreeId = d.id
    where u.role = 'supervisor'
    limit ? offset ?`
-
-    const [result] = await cnn.query(query,[validateLimit,offset])
-
+    const [result] = await pool.query(query,[validateLimit,offset])
     return result
 }
 
 export const getTotalSupervisorsModel = async () => {
-    const cnn = await pool.getConnection()
-
     const query = `select COUNT(*) as total from users where role = 'supervisor'`
-
-    const [result] = await cnn.query(query)
-
+    const [result] = await pool.query(query)
     return result
 }
 
 export const getCareersModel = async () => {
-
-    const cnn = await pool.getConnection()
-
     const query = `select d.id, d.code, d.name, d.faculty from degrees as d`
-
-    const [result] = await cnn.query(query)
-
+    const [result] = await pool.query(query)
     return result
 }
 
 export const disableSupervisorModel = async (id) => {
-
-    const cnn = await pool.getConnection()
-
     const query = `update users set isDeleted = true where accountNumber = ? and role = 'supervisor'`
-    const [result] = await cnn.query(query, [id])
+    const [result] = await pool.query(query, [id])
     return result
 }
 
 export const enableSupervisorModel = async (id) => {
-
-    const cnn = await pool.getConnection()
-
     const query = `update users set isDeleted = 'false' where accountNumber = ? and role = 'supervisor'`
-    const [result] = await cnn.query(query, [id])
+    const [result] = await pool.query(query, [id])
     return result
 }
 

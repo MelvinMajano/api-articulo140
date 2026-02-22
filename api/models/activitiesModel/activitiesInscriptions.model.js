@@ -2,20 +2,12 @@ import { success } from "zod";
 import {pool} from "../../config/db.js"
 
 export const studentExists = async (studentID) => {
-
-    const cnn = await pool.getConnection();
-
-    const [rows] = await cnn.execute(`select * from users where id = ?`, [studentID]);
-    
+    const [rows] = await pool.execute(`select * from users where id = ?`, [studentID]);
     return rows
 }
 
 export const activityExists = async (activityID) => {
-
-    const cnn = await pool.getConnection();
-
-    const [rows] = await cnn.execute(`select * from activities where id = ?`, [activityID]);
-
+    const [rows] = await pool.execute(`select * from activities where id = ?`, [activityID]);
     return rows
 }
 
