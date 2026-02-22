@@ -1,7 +1,8 @@
 import { IDv, NumbersV } from "../schemas/Auth.Schema.js"
 import { userExist } from "../models/auth.model.js"
-import { CurrentActivitiesDB, VOAEHours, getStudentsModel,getSupervisorsModel,disableSupervisorModel,enableSupervisorModel,getCareersModel,registerActivityForStudentModel } from "../models/users.model.js"
+import { CurrentActivitiesDB, VOAEHours, getStudentsModel,getSupervisorsModel,getTotalSupervisorsModel,disableSupervisorModel,enableSupervisorModel,getCareersModel,registerActivityForStudentModel } from "../models/users.model.js"
 import { validateActivityForUser } from "../schemas/ActivitiesSchema/activitiesSchema.js"
+import { validateOptions } from "../utils/activities/validateOptionsPaination.js"
 import { validateResult, validateUserDb } from "../utils/validations.js"
 import { successResponse,erroResponse } from "../utils/responseHandler.js"
 
@@ -100,18 +101,44 @@ export default class UserController{
 
     static getSupervisors =  async (req,res) => {
 
+      const {page,limit} = req.query
+      const {validateLimit,validatePage} = await validateOptions(page,limit)
+
+      const offset = (validatePage - 1) * validateLimit;
+
+      const options = {
+          validatePage,
+          validateLimit,
+          offset
+      }
+
       try{
 
-        const supervisors = await getSupervisorsModel()
+        const supervisors = await getSupervisorsModel(options)
 
         if (supervisors.length === 0){
             return erroResponse (res,404,"No hay supervisores registrados")
         }
 
-        return successResponse(res,200,"Supervisores:",supervisors)
+        const countResult = await getTotalSupervisorsModel()
+
+        const total = countResult[0].total
+
+        const result = {
+          data: supervisors,
+          pagination: {
+            total,
+            page,
+            limit,
+            totalPage:Math.ceil(total/limit),
+          }
+        }
+
+        return successResponse(res,200,"Supervisores:",result)
 
 
       }catch (error){
+        console.log(error)
         return erroResponse(res,500,"Error al obtener supervisores",error)
       }
     }

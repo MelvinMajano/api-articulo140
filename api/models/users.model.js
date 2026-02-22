@@ -63,13 +63,25 @@ export const getStudentsModel = async () => {
     return result
 }
 
-export const getSupervisorsModel = async () => {
+export const getSupervisorsModel = async (options) => {
 
+    const {validateLimit,offset} = options;
     const cnn = await pool.getConnection()
 
     const query = `select u.id, u.name, u.email, u.accountNumber, u.identityNumber, d.name as career, u.isDeleted from users as u
    inner join degrees as d on u.degreeId = d.id
-   where u.role = 'supervisor'`
+   where u.role = 'supervisor'
+   limit ? offset ?`
+
+    const [result] = await cnn.query(query,[validateLimit,offset])
+
+    return result
+}
+
+export const getTotalSupervisorsModel = async () => {
+    const cnn = await pool.getConnection()
+
+    const query = `select COUNT(*) as total from users where role = 'supervisor'`
 
     const [result] = await cnn.query(query)
 
