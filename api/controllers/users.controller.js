@@ -1,6 +1,6 @@
 import { IDv, NumbersV } from "../schemas/Auth.Schema.js"
 import { userExist } from "../models/auth.model.js"
-import { CurrentActivitiesDB, VOAEHours, getStudentsModel,getSupervisorsModel,getTotalSupervisorsModel,disableSupervisorModel,enableSupervisorModel,getCareersModel,registerActivityForStudentModel } from "../models/users.model.js"
+import { CurrentActivitiesDB, VOAEHours, getStudentsModel,getTotalStudentsModel,getSupervisorsModel,getTotalSupervisorsModel,disableSupervisorModel,enableSupervisorModel,getCareersModel,registerActivityForStudentModel } from "../models/users.model.js"
 import { validateActivityForUser } from "../schemas/ActivitiesSchema/activitiesSchema.js"
 import { validateOptions } from "../utils/activities/validateOptionsPaination.js"
 import { validateResult, validateUserDb } from "../utils/validations.js"
@@ -83,15 +83,40 @@ export default class UserController{
 
     static getStudents =  async (req,res) => {
 
+      const {page,limit} = req.query
+      const {validateLimit,validatePage} = await validateOptions(page,limit)
+
+      const offset = (validatePage - 1) * validateLimit;
+
+      const options = {
+          validatePage,
+          validateLimit,
+          offset
+        }
+
       try{
 
-        const students = await getStudentsModel()
+        const students = await getStudentsModel(options)
 
         if (students.length === 0){
             return erroResponse (res,404,"No hay estudiantes registrados")
         }
 
-        return successResponse(res,200,"Estudiantes:",students)
+        const countResult = await getTotalStudentsModel()
+
+        const total = countResult[0].total
+
+        const result = {
+          data: students,
+          pagination: {
+            total,
+            page,
+            limit,
+            totalPage:Math.ceil(total/limit),
+          }
+        }
+
+        return successResponse(res,200,"Estudiantes:",result)
 
 
       }catch (error){

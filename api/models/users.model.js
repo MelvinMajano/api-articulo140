@@ -50,11 +50,23 @@ LEFT JOIN activityScopes s
 };
 
 
-export const getStudentsModel = async () => {
+export const getStudentsModel = async (options) => {
+
+    const {validateLimit,offset} = options;
+
     const query = `select u.id,u.name, u.email, u.accountNumber, u.identityNumber, d.name as career from users as u 
    inner join degrees as d on u.degreeId = d.id
-   where u.role = 'student' and u.isDeleted = 'false'`
+   where u.role = 'student'
+   limit ? offset ?`
+
+    const [result] = await pool.query(query,[validateLimit,offset])
+    return result
+}
+
+export const getTotalStudentsModel = async () => {
+    const query = `select COUNT(*) as total from users where role = 'student'`
     const [result] = await pool.query(query)
+
     return result
 }
 
