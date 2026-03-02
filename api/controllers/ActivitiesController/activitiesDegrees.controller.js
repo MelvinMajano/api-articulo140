@@ -1,6 +1,8 @@
 import { validateDegree } from "../../schemas/ActivitiesSchema/activitiesDegreesSchema.js";
-import { createDegreeModel, getDegreesModel, updateDegreeModel, deleteDegreeModel, restoreDegreeModel , degreeExistsModel, hasConflictDegreeModel } from "../../models/activitiesModel/activitiesDegrees.model.js";
+import { createDegreeModel, getDegreesModel, getTotalDegreesModel, updateDegreeModel, deleteDegreeModel, restoreDegreeModel , degreeExistsModel, hasConflictDegreeModel } from "../../models/activitiesModel/activitiesDegrees.model.js";
 import { successResponse, erroResponse } from "../../utils/responseHandler.js";
+import { validateOptions } from "../../utils/activities/validateOptionsPaination.js";
+import { getTotalStudentsModel } from "../../models/users.model.js";
 
 export class ActivitiesDegreesController {
 
@@ -23,9 +25,42 @@ export class ActivitiesDegreesController {
     }
 
     static getDegrees = async (req, res) => {
+
+        const {page, limit} = req.query
+        const {validateLimit, validatePage } = await validateOptions(page,limit)
+
+        const offset = (validatePage - 1) * validateLimit
+
+        const options = {
+            validatePage,
+            validateLimit,
+            offset 
+        }
+
         try {
-            const degrees = await getDegreesModel();
-            return successResponse(res, 200, "Carreras obtenidas con éxito", degrees);
+            const degrees = await getDegreesModel(options);
+
+            if (degrees.length === 0){
+                return erroResponse(res, 404, "No se encontraron carreras")
+            }
+
+            const countResult = await getTotalDegreesModel()
+
+            const total = countResult[0].total
+
+            const result = {
+                data: degrees,
+                pagination: {
+                    total,
+                    page,
+                    limit,
+                    totalPage: Math.ceil(total/limit)
+                }
+            }
+
+            console.log(Math.ceil(total/limit))
+
+            return successResponse(res, 200, "Carreras obtenidas con éxito", result);
         } catch (error) {
             return erroResponse(res, 500, "Hubo un problema al obtener las carreras", error);
         }

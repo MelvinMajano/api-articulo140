@@ -19,10 +19,19 @@ export const createDegreeModel = async (degree) => {
     await pool.execute(query, [code, name, faculty]);
 }
 
-export const getDegreesModel = async () => {
-    const query = "select * from degrees";
-    const [rows] = await pool.execute(query);
+export const getDegreesModel = async (options) => {
+    
+    const {validateLimit, offset} = options;
+
+    const query = `select * from degrees limit ? offset ?`;
+    const [rows] = await pool.query(query, [validateLimit,offset]);
     return rows;
+}
+
+export const getTotalDegreesModel = async () => {
+    const query = `select count(*) as total from degrees`;
+    const [result] = await pool.query(query);
+    return result;
 }
 
 export const updateDegreeModel = async (degree, id) => {
