@@ -83,7 +83,7 @@ export default class UserController{
 
     static getStudents =  async (req,res) => {
 
-      const {page,limit} = req.query
+      const {page,limit, search } = req.query
       const {validateLimit,validatePage} = await validateOptions(page,limit)
 
       const offset = (validatePage - 1) * validateLimit;
@@ -91,7 +91,8 @@ export default class UserController{
       const options = {
           validatePage,
           validateLimit,
-          offset
+          offset,
+          search
         }
 
       try{
@@ -102,7 +103,7 @@ export default class UserController{
             return erroResponse (res,404,"No hay estudiantes registrados")
         }
 
-        const countResult = await getTotalStudentsModel()
+        const countResult = await getTotalStudentsModel(options.search)
 
         const total = countResult[0].total
 

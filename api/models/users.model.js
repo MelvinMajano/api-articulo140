@@ -2,17 +2,29 @@ import { pool } from "../config/db.js";
 import { v4 as uuidv4 } from "uuid";
 
 export const CurrentActivitiesDB=async (accountNumber)=>{
-    const query = ` SELECT 
+    const query = `SELECT 
+    a.id,
     u.name AS studentName,
-    GROUP_CONCAT(a.title ORDER BY a.startDate SEPARATOR ', ') AS activitiesParticipated
+    a.title AS activitiesParticipated,
+    att.hoursAwarded AS voaeHours,
+    sc.scopes
 FROM registrations r
 INNER JOIN activities a 
     ON r.activityId = a.id
 INNER JOIN users u
     ON r.studentId = u.id
+INNER JOIN attendances att
+    ON att.studentId = u.id 
+    AND att.activityId = a.id
+LEFT JOIN (
+    SELECT 
+        activityId,
+        GROUP_CONCAT(scope ORDER BY scope SEPARATOR ',') AS scopes
+    FROM activityScopes
+    GROUP BY activityId
+) sc ON sc.activityId = a.id
 WHERE u.accountNumber = ? or u.id = ? or identityNumber = ?
-  AND a.status = 'finished'
-GROUP BY u.id, u.name;`
+AND a.status = 'finished';`
 
     const [result] = await pool.query(query,[accountNumber,accountNumber,accountNumber])
     return result
@@ -51,23 +63,50 @@ LEFT JOIN activityScopes s
 
 
 export const getStudentsModel = async (options) => {
+  const { validateLimit, offset, search } = options
 
-    const {validateLimit,offset} = options;
+  const searchValue = search ? `%${search}%` : null
 
-    const query = `select u.id,u.name, u.email, u.accountNumber, u.identityNumber, d.name as career from users as u 
-   inner join degrees as d on u.degreeId = d.id
-   where u.role = 'student'
-   limit ? offset ?`
+  const query = `
+    SELECT u.id, u.name, u.email, u.accountNumber, u.identityNumber, d.name as career 
+    FROM users AS u 
+    INNER JOIN degrees AS d ON u.degreeId = d.id
+    WHERE u.role = 'student'
+    ${search ? `AND (
+      u.name           LIKE ? OR
+      u.email          LIKE ? OR
+      u.accountNumber  LIKE ? OR
+      u.identityNumber LIKE ? OR
+      d.name           LIKE ?
+    )` : ''}
+    LIMIT ? OFFSET ?
+  `
 
-    const [result] = await pool.query(query,[validateLimit,offset])
-    return result
+  const params = search ? [searchValue, searchValue, searchValue, searchValue, searchValue, validateLimit, offset]
+                 : [validateLimit, offset]
+
+  const [result] = await pool.query(query, params)
+  return result
 }
 
-export const getTotalStudentsModel = async () => {
-    const query = `select COUNT(*) as total from users where role = 'student'`
-    const [result] = await pool.query(query)
+export const getTotalStudentsModel = async (search = null) => {
+    const searchValue = search ? `%${search}%` : null;
 
-    return result
+    const query = `
+        SELECT COUNT(*) as total 
+        FROM users 
+        WHERE role = 'student'
+        ${searchValue ? `AND (
+            name LIKE ? OR
+            email LIKE ? OR
+            accountNumber LIKE ? OR
+            identityNumber LIKE ? OR
+            degreeId IN (SELECT id FROM degrees WHERE name LIKE ?)
+        )` : ''}
+    `;
+
+    const [result] = await pool.query(query, searchValue ? [searchValue, searchValue, searchValue, searchValue, searchValue] : []);
+    return result;
 }
 
 export const getSupervisorsModel = async (options) => {
