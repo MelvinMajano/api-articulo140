@@ -58,8 +58,6 @@ export class ActivitiesDegreesController {
                 }
             }
 
-            console.log(Math.ceil(total/limit))
-
             return successResponse(res, 200, "Carreras obtenidas con éxito", result);
         } catch (error) {
             return erroResponse(res, 500, "Hubo un problema al obtener las carreras", error);

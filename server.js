@@ -5,6 +5,7 @@ import activitiesRouter from "./api/routes/activities.routes.js";
 import "./api/utils/activities/statusUpdater.js"
 import AuthRouter from "./api/routes/auth.routes.js";
 import UserRouter from "./api/routes/users.routes.js"
+import aboutRouter from "./api/routes/about.routes.js"
 import swaggerSpec from "./api/config/swaggerOptions.js";
 import swaggerUi from "swagger-ui-express";
 
@@ -50,6 +51,7 @@ app.use((req, res, next) => {
 app.use('/api/activities',activitiesRouter)
 app.use("/api/auth",AuthRouter)
 app.use("/api/users",UserRouter)
+app.use("/api/about",aboutRouter)
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 

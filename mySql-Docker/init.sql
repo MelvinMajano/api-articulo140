@@ -137,3 +137,38 @@ ADD CONSTRAINT pk_files PRIMARY KEY (id);
 
 ALTER TABLE files
 ADD CONSTRAINT fk_files_activity FOREIGN KEY (activityId) REFERENCES activities(id);
+
+create table about_sections (
+  id            INT PRIMARY KEY DEFAULT 1,
+  carousel      BOOLEAN DEFAULT TRUE,
+  mision_vision BOOLEAN DEFAULT TRUE,
+  competencies  BOOLEAN DEFAULT TRUE,
+  goals     BOOLEAN DEFAULT TRUE,
+  updated_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+create table about_posts(
+  id          VARCHAR(36)  PRIMARY KEY,
+  title       VARCHAR(200) NOT NULL,
+  content     varchar(200)         NOT NULL,
+  image_url   VARCHAR(500) NULL,
+  category    ENUM('VOAE', 'Academico', 'General', 'Convocatoria') NOT NULL DEFAULT 'General',
+  is_pinned   BOOLEAN      DEFAULT FALSE,
+  is_visible  BOOLEAN      DEFAULT TRUE,
+  event_date  DATETIME     NULL,        
+  event_place VARCHAR(255) NULL,        
+  created_at  TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+  updated_at  TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+
+create table about_post_views (
+  id         VARCHAR(36) PRIMARY KEY,
+  post_id    VARCHAR(36) NOT NULL,
+  viewer_key VARCHAR(36) NOT NULL,  
+  viewed_at  TIMESTAMP   DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (post_id) REFERENCES about_posts(id) ON DELETE CASCADE,
+  UNIQUE KEY unique_view (post_id, viewer_key) 
+);
+
+
