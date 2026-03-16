@@ -184,8 +184,8 @@ export const registerActivityForStudentModel = async(activityId, studentId) => {
 
         const activityInfo = rows[0];
 
-        if (activityInfo.status !== 'finished') {
-            throw new Error('La actividad no ha sido finalizada');
+        if (activityInfo.status !== 'external') {
+            throw new Error('La actividad no es de una carrera externa');
         }
 
         const voaeHours = activityInfo.voaeHours;

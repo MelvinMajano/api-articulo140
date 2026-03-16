@@ -1,5 +1,5 @@
-import { getActividadbyIdModel, getActividadModel,getActivitiesForSupervisorModel, confirmSupervisor, ValidateCreateActivitiesModel, ValitateUpdateActivitiesModel, ValidateDeleteActivitiesModel, ValitateActivitiesDisableEnableModel, TotalActividadModel, updatestatusActivity } from "../../models/activitiesModel/activities.model.js";
-import { validateActividad, validateActividadDisableEneable, validateActividadput, validateactivitiesStatus } from "../../schemas/ActivitiesSchema/activitiesSchema.js";
+import { getActividadbyIdModel, getActividadModel,getDefaultAdminModel,getActivitiesForSupervisorModel, confirmSupervisor, ValidateCreateActivitiesModel, ValitateUpdateActivitiesModel, ValidateDeleteActivitiesModel, ValitateActivitiesDisableEnableModel, TotalActividadModel, updatestatusActivity } from "../../models/activitiesModel/activities.model.js";
+import { validateActividad,validateExternalActivity, validateActividadDisableEneable, validateActividadput, validateactivitiesStatus } from "../../schemas/ActivitiesSchema/activitiesSchema.js";
 import { v4 as uuidv4 } from "uuid";
 import { successResponse, erroResponse } from "../../utils/responseHandler.js";
 import {formatDateHonduras} from "../../utils/activities/formatDateHonduras.js";
@@ -162,7 +162,7 @@ export class ActivitiesController {
 
         try {
             const response = await ValidateCreateActivitiesModel.validateActivitiesModel(data);
-            console.log(response);
+
             if(response){
                 return erroResponse(res, 404, 'No se puede crear una actividad en este dia ya que ya existe otra actividad en el mismo horario');
             }
@@ -170,6 +170,33 @@ export class ActivitiesController {
             return successResponse(res, 201, 'Actividad creada con exito');
         } catch (error) {
             return erroResponse(res, 400, 'hubo un error al crear la data', error);
+        }
+    }
+
+    static createExternalActivityController = async (req, res) => {
+        const { success, error, data } = await validateExternalActivity(req.body)
+
+        if (!success) {
+            console.error('Error de validación:', error);
+            return erroResponse(res, 400, 'Error al validar la data', error)
+        }
+
+        try {
+            const adminResult = await getDefaultAdminModel()
+
+            if (!adminResult || adminResult.length === 0) {
+            return erroResponse(res, 500, 'No se encontró un administrador por defecto')
+            }
+
+            data.id          = uuidv4()
+            data.degreeId    = 1
+            data.supervisorId = adminResult[0].id
+
+            await ValidateCreateActivitiesModel.createExternalActivityModel(data)
+            return successResponse(res, 201, 'Actividad externa creada con éxito')
+        } catch (error) {
+            console.log('Error al crear la actividad externa:', error)
+            return erroResponse(res, 500, 'Error al crear la actividad externa', error)
         }
     }
 

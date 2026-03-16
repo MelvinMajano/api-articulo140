@@ -14,6 +14,20 @@ const activitiesSchema = zod.object({
 export const validateActividad = async(data)=>{
     return activitiesSchema.safeParse(data);
 }
+
+const externalActivitySchema = zod.object({
+  title:          zod.string().min(3),
+  description:    zod.string().min(5).max(500),
+  startDate:      zod.coerce.date(),
+  endDate:        zod.coerce.date(),
+  voaeHours:      zod.number().positive(),
+  availableSpots: zod.number().int().positive(),
+  scopes:         zod.array(zod.enum(["1","2","3","4"])).min(1),
+})
+
+export const validateExternalActivity = async (data) => {
+  return externalActivitySchema.safeParse(data)
+}
  
 const activitiesSchemaput = zod.object({
     "actividadId":zod.uuidv4(),
@@ -60,7 +74,7 @@ export const validateActividadDisableEneable = async(data)=>{
 
 
 const activitiesStatus = zod.object({
-    "actividadId":zod.uuidv4(),
+    "actividadId":zod.uuid(),
     "status": zod.number().int(),
 }).strict();
 

@@ -54,7 +54,7 @@ CREATE TABLE activities (
     voaeHours INT NOT NULL,
     availableSpots INT NOT NULL,
     supervisorId CHAR(36) NOT NULL,
-    status ENUM('pending', 'inProgress', 'finished') NOT NULL DEFAULT 'pending',
+    status ENUM('pending', 'inProgress', 'finished', 'submittedToSudecad', 'approvedBySudecad','external') NOT NULL DEFAULT 'pending',
     isDisabled ENUM('true', 'false') NOT NULL DEFAULT 'false',
     isDeleted ENUM('true', 'false') NOT NULL DEFAULT 'false',
     access ENUM('all', 'restricted') NOT NULL DEFAULT 'all',
@@ -147,6 +147,8 @@ create table about_sections (
   goals     BOOLEAN DEFAULT TRUE,
   updated_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+INSERT INTO about_sections (id) VALUES (1);
 
 create table about_posts(
   id          VARCHAR(36)  PRIMARY KEY,

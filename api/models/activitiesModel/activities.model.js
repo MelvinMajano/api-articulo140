@@ -23,6 +23,12 @@ export const TotalActividadModel =async()=>{
     return rows;
 }
 
+export const getDefaultAdminModel = async () => {
+    const query = `SELECT id FROM users WHERE role = 'admin' LIMIT 1`;
+    const [rows] = await pool.query(query);
+    return rows;
+}
+
 
 export const getActividadbyIdModel =async(id)=>{
 
@@ -90,6 +96,32 @@ export class ValidateCreateActivitiesModel {
         conn.release();
     }
 
+    }
+
+    static createExternalActivityModel = async(data)=>{
+        const {id,title,description,degreeId,startDate,endDate,voaeHours,availableSpots,supervisorId,scopes}= data;
+
+        const conn = await pool.getConnection();
+        try {
+            await conn.beginTransaction();
+            const query = `insert into activities(id,title,description,degreeId,startDate,endDate,voaeHours,availableSpots,supervisorId,status)
+            values(?,?,?,?,?,?,?,?,?,?)`;
+            await conn.execute(query,[id,title,description,degreeId,startDate,endDate,voaeHours,availableSpots,supervisorId,'external']);
+
+            for (const scope of scopes) {
+                const queryActividad_scope = `insert into activityScopes(activityId,scope)
+                values(?,?)`;
+                await conn.execute(queryActividad_scope,[id,scope]);
+            }
+
+            conn.commit();
+            return;
+        } catch (error) {
+            conn.rollback();
+            throw error;
+        }finally{
+            conn.release();
+        }
     }
 }
 

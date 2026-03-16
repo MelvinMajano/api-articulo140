@@ -16,6 +16,8 @@ mainActivitiesRouter.get('/supervisor/:id',verifyToken,isSupervisor,ActivitiesCo
 
 mainActivitiesRouter.post('/', verifyToken,isAdmin,ActivitiesController.createActivityController);
 
+mainActivitiesRouter.post('/external', verifyToken,isAdmin,ActivitiesController.createExternalActivityController);
+
 mainActivitiesRouter.put('/:id', verifyToken,isAdmin,ActivitiesController.putActivityByIdController);
 
 mainActivitiesRouter.put('/disableEneable/:id', verifyToken,isAdmin,ActivitiesController.putActivityDisableEneable);
