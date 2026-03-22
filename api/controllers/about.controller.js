@@ -211,16 +211,12 @@ export class AboutController {
         const {postid} = req.params
         const {viewer_key} = req.body
 
-        console.log(postid)
-
         try {
 
             const existing = await getPostByIdModel(postid)
             if (!existing || existing.length === 0) {
                 return erroResponse(res, 404, "Post no encontrado")
             }
-
-            console.log(`Incrementando vistas para el post ${postid} por el viewer ${viewer_key}`)
 
             await incrementPostViewsModel(postid, viewer_key)
             return successResponse(res, 200, "Visitas del post incrementadas con éxito");

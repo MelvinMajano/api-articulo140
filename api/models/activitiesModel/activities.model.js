@@ -4,22 +4,51 @@ import { deshabilitarActividad, habilitarActividad, calcularStatusPorFechas } fr
 
 
 export const getActividadModel =async(options)=>{
-    const {validateLimit,offset}= options;
+
+    const {validateLimit,offset,search}= options;
+
+    const searchValue = search ? `%${search}%` : null;
+
     const query = `select a.id, a.title,a.description,a.startDate, a.endDate, a.voaeHours, a.availableSpots,a.status,a.isDeleted,a.isDisabled, u.name as Supervisor,u.id as supervisorId, group_concat(ase.scope) as scopes from activities as a
     inner join users as u on a.supervisorId = u.id
     inner join activityScopes as ase on a.id = ase.activityId
     where a.isDeleted = 'false'
     group by a.id, a.title,a.description, a.startDate, a.endDate, a.voaeHours, a.availableSpots, a.status, u.name, u.id, a.isDeleted, a.isDisabled
+    ${search ? `HAVING (
+            a.title                        LIKE ? OR
+            CAST(a.voaeHours AS CHAR)      LIKE ? OR
+            u.name                         LIKE ? OR
+            GROUP_CONCAT(ase.scope)        LIKE ?
+        )` : ""}
     order by a.startDate DESC
     limit ? offset ?`; 
 
-    const [rows] = await pool.query(query,[validateLimit,offset]);
+    const [rows] = await pool.query(query, searchValue ? [searchValue, searchValue, searchValue, searchValue, validateLimit, offset] : [validateLimit, offset]);
     return rows;
 }
 
-export const TotalActividadModel =async()=>{
-    const query = `SELECT COUNT(*) as total FROM activities`; 
-    const [rows] = await pool.query(query);
+export const TotalActividadModel =async(search)=>{
+
+    const searchValue = search ? `%${search}%` : null;
+
+    const query = `
+        SELECT COUNT(*) AS total
+        FROM (
+            SELECT a.id
+            FROM activities AS a
+            INNER JOIN users          AS u   ON a.supervisorId = u.id
+            INNER JOIN activityScopes AS ase ON a.id = ase.activityId
+            WHERE a.isDeleted = 'false'
+            GROUP BY a.id, a.title, a.voaeHours, u.name, a.isDeleted
+            ${search ? `HAVING (
+                a.title                   LIKE ? OR
+                CAST(a.voaeHours AS CHAR) LIKE ? OR
+                u.name                    LIKE ? OR
+                GROUP_CONCAT(ase.scope)   LIKE ?
+            )` : ""}
+        ) AS filtered
+    `
+    const [rows] = await pool.query(query, searchValue ? [searchValue, searchValue, searchValue, searchValue] : []);
     return rows;
 }
 

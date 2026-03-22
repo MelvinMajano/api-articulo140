@@ -127,7 +127,7 @@ export default class UserController{
 
     static getSupervisors =  async (req,res) => {
 
-      const {page,limit} = req.query
+      const {page,limit, search} = req.query
       const {validateLimit,validatePage} = await validateOptions(page,limit)
 
       const offset = (validatePage - 1) * validateLimit;
@@ -135,7 +135,8 @@ export default class UserController{
       const options = {
           validatePage,
           validateLimit,
-          offset
+          offset,
+          search
       }
 
       try{
@@ -146,7 +147,7 @@ export default class UserController{
             return erroResponse (res,404,"No hay supervisores registrados")
         }
 
-        const countResult = await getTotalSupervisorsModel()
+        const countResult = await getTotalSupervisorsModel(options.search)
 
         const total = countResult[0].total
 
@@ -164,7 +165,6 @@ export default class UserController{
 
 
       }catch (error){
-        console.log(error)
         return erroResponse(res,500,"Error al obtener supervisores",error)
       }
     }

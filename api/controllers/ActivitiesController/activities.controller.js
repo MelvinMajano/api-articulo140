@@ -7,14 +7,15 @@ import { validateOptions } from "../../utils/activities/validateOptionsPaination
 
 export class ActivitiesController {
     static getActivityController =async(req,res)=>{
-            const {page,limit} = req.query;
+            const {page,limit, search} = req.query;
             const {validatePage,validateLimit} = validateOptions(page,limit)
 
             const offset = (validatePage - 1) * validateLimit;
             const options = {
                 validatePage,
                 validateLimit,
-                offset
+                offset,
+                search
             }
          try {
             const actividades = await getActividadModel(options);  
@@ -29,7 +30,7 @@ export class ActivitiesController {
                 endDate: formatDateHonduras(actividad.endDate),
             }));
 
-            const countResult = await TotalActividadModel();
+            const countResult = await TotalActividadModel(options.search);
         
             const total = countResult[0].total;
 
@@ -177,7 +178,7 @@ export class ActivitiesController {
         const { success, error, data } = await validateExternalActivity(req.body)
 
         if (!success) {
-            console.error('Error de validación:', error);
+          
             return erroResponse(res, 400, 'Error al validar la data', error)
         }
 
@@ -195,7 +196,6 @@ export class ActivitiesController {
             await ValidateCreateActivitiesModel.createExternalActivityModel(data)
             return successResponse(res, 201, 'Actividad externa creada con éxito')
         } catch (error) {
-            console.log('Error al crear la actividad externa:', error)
             return erroResponse(res, 500, 'Error al crear la actividad externa', error)
         }
     }

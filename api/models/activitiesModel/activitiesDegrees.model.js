@@ -21,16 +21,31 @@ export const createDegreeModel = async (degree) => {
 
 export const getDegreesModel = async (options) => {
     
-    const {validateLimit, offset} = options;
+    const {validateLimit, offset, search} = options;
 
-    const query = `select * from degrees limit ? offset ?`;
-    const [rows] = await pool.query(query, [validateLimit,offset]);
+    const searchValue = search ? `%${search}%` : null
+
+    const query = `select * from degrees
+                   ${search ? `WHERE (
+                    name LIKE ? OR
+                    code LIKE ? OR
+                    faculty LIKE ?
+                    )` : ""}
+                    limit ? offset ?`;
+    const [rows] = await pool.query(query, searchValue ? [searchValue, searchValue, searchValue, validateLimit, offset] : [validateLimit, offset]);
     return rows;
 }
 
-export const getTotalDegreesModel = async () => {
-    const query = `select count(*) as total from degrees`;
-    const [result] = await pool.query(query);
+export const getTotalDegreesModel = async (search) => {
+
+    const searchValue = search ? `%${search}%` : null;
+
+    const query = `select count(*) as total from degrees ${search ? `WHERE (
+                    name LIKE ? OR
+                    code LIKE ? OR
+                    faculty LIKE ?
+                    )` : ""}`;
+    const [result] = await pool.query(query, searchValue ? [searchValue, searchValue, searchValue] : []);
     return result;
 }
 

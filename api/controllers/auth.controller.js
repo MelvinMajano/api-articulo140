@@ -140,7 +140,6 @@ static UpdatePassword = async (req,res)=>{
             
         const Pass = await VerifyPasswordDB(decoded.email,decoded.id)
 
-        console.log(Pass)
 
         if(!Pass || Pass.length===0){
             return erroResponse(res,404,"Contraseña no concuerda")
@@ -154,7 +153,6 @@ static UpdatePassword = async (req,res)=>{
            
         }
         
-        console.log(hash_password_New,decoded.id)
         const resultado = await ChangePassDb(hash_password_New,decoded.id)
         
         if(resultado){

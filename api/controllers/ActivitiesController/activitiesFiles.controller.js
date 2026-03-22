@@ -162,7 +162,7 @@ export class ActivitiesFilesController {
       )
 
       } catch (err) {
-        console.warn('Advertencia: No se pudo validar en Cloudinary:', err.message)
+            return erroResponse(res, 400, 'no se pudo validar en Cloudinary', err);
       }
         }catch (error) {
             return erroResponse(res, 400, 'error al actualizar la imagen', error);

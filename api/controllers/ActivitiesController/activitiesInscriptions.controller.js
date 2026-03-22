@@ -6,8 +6,6 @@ export class ActivitiesInscriptionsController {
     
         const {id,activityid} = req.params
 
-        console.log(id, activityid)
-
        try{
 
            const student = await studentExists(id);

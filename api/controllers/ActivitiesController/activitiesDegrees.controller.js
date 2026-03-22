@@ -26,7 +26,7 @@ export class ActivitiesDegreesController {
 
     static getDegrees = async (req, res) => {
 
-        const {page, limit} = req.query
+        const {page, limit, search} = req.query
         const {validateLimit, validatePage } = await validateOptions(page,limit)
 
         const offset = (validatePage - 1) * validateLimit
@@ -34,7 +34,8 @@ export class ActivitiesDegreesController {
         const options = {
             validatePage,
             validateLimit,
-            offset 
+            offset,
+            search
         }
 
         try {
@@ -44,7 +45,7 @@ export class ActivitiesDegreesController {
                 return erroResponse(res, 404, "No se encontraron carreras")
             }
 
-            const countResult = await getTotalDegreesModel()
+            const countResult = await getTotalDegreesModel(options.search)
 
             const total = countResult[0].total
 

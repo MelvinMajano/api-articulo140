@@ -89,7 +89,7 @@ export const getStudentsModel = async (options) => {
   return result
 }
 
-export const getTotalStudentsModel = async (search = null) => {
+export const getTotalStudentsModel = async (search) => {
     const searchValue = search ? `%${search}%` : null;
 
     const query = `
@@ -110,20 +110,48 @@ export const getTotalStudentsModel = async (search = null) => {
 }
 
 export const getSupervisorsModel = async (options) => {
-    const {validateLimit,offset} = options;
+    const {validateLimit,offset, search} = options;
+
+    const searchValue = search ? `%${search}%` : null
+
     const query = `select u.id, u.name, u.email, u.accountNumber, u.identityNumber, d.name as career, u.isDeleted from users as u
    inner join degrees as d on u.degreeId = d.id
    where u.role = 'supervisor'
-   limit ? offset ?`
-    const [result] = await pool.query(query,[validateLimit,offset])
+   ${search ? `AND (
+      u.name           LIKE ? OR
+      u.email          LIKE ? OR
+      u.accountNumber  LIKE ? OR
+      u.identityNumber LIKE ? OR
+      d.name           LIKE ?)`
+    : ''}
+     limit ? offset ?`
+
+    const params = search ? [searchValue, searchValue, searchValue, searchValue, searchValue, validateLimit, offset]
+                 : [validateLimit, offset]
+
+    const [result] = await pool.query(query, params)
     return result
 }
 
-export const getTotalSupervisorsModel = async () => {
-    const query = `select COUNT(*) as total from users where role = 'supervisor'`
-    const [result] = await pool.query(query)
-    return result
-}
+export const getTotalSupervisorsModel = async (search = null) => {
+    const searchValue = search ? `%${search}%` : null;
+
+    const query = `
+        SELECT COUNT(*) as total 
+        FROM users 
+        WHERE role = 'supervisor'
+        ${searchValue ? `AND (
+            name LIKE ? OR
+            email LIKE ? OR
+            accountNumber LIKE ? OR
+            identityNumber LIKE ? OR
+            degreeId IN (SELECT id FROM degrees WHERE name LIKE ?)
+        )` : ''}
+    `;
+
+    const [result] = await pool.query(query, searchValue ? [searchValue, searchValue, searchValue, searchValue, searchValue] : []);
+    return result;
+ }
 
 export const getCareersModel = async () => {
     const query = `select d.id, d.code, d.name, d.faculty from degrees as d`
