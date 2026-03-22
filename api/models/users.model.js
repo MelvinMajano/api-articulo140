@@ -47,7 +47,7 @@ LEFT JOIN attendances at
     AND r.activityId = at.activityId
 LEFT JOIN activities a 
     ON r.activityId = a.id 
-    AND a.status = 'finished'
+    AND a.status in ('external', 'approvedBySudecad')
 LEFT JOIN activityScopes s
     ON a.id = s.activityId
     WHERE 
